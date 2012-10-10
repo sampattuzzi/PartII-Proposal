@@ -1,87 +1,96 @@
 
 % Draft #1
 
-\vfil
-
-\centerline{\Large Part II Project Proposal}
-\vspace{0.4in}
-\centerline{\Large GPU Acceleration of the Ypnos Programming Language}
-\vspace{0.4in}
-\centerline{\large S. Pattuzzi, Robinson College}
-\vspace{0.3in}
-\centerline{\large Originator: D. Orchard}
-\vspace{0.3in}
-\centerline{\large 9$^{th}$ of October, 2012} 
-
-\vfil
-
-
-\noindent
-{\bf Project Supervisor:} D. Orchard
-\vspace{0.2in}
-
-\noindent
-{\bf Director of Studies:} Dr A. Beresford
-\vspace{0.2in}
-\noindent
- 
-\noindent
-{\bf Project Overseers:} Dr A. Madhavapeddy \& Dr M. Kuhn
-
 
 % Main document
 
 \section*{Introduction, The Problem To Be Addressed}
 
-In recent years, Moore's law has begin to plateau. As a result the hardware 
+In recent years, Moore's law has begun to plateau. As a result the hardware 
 industry has increasingly been turning to MIMD and SIMD as a solution. Some of 
 the most high performing SIMD implementations today can be found in GPUs and 
 can be harnessed via GPGPU languages such as CUDA and OpenCL. However, taking 
-advantage of this hard as it requires knowledge of the low-level concept of 
+advantage of this hard as it requires knowledge of the low-level concepts of 
 these languages. It is also not portable between different hardware and methods 
 of concurrency.
 
-Stencil computation
+Structured grids are a common computational pattern for scientific parallel 
+computation that can solve these problems. They allow us to specify 
+\emph{stencils} or \emph{kernels} which are computations that apply to a small 
+portion of the grid. These stencils are convolved with the grid to give a grid 
+of results. Many algorithms can be described in this way including the Gaussian 
+blur filter, edge detection as well as scientific applications such as fluid 
+dynamics. It is also possible to highly parallelize this computation by 
+splitting the grid into smaller chunks and running the stencil on each 
+separately.
 
-What is Ypnos
+Ypnos is an Embedded Domain Specific Language in the Haskell programming 
+language that is capable of describing and running these kernels over a grid.  
+It defines a syntax and various primitives for the structured grid computation.  
 
-How it works
+A kernel is described using a modified Haskell function syntax. It is then 
+applied to a grid using a \emph{run} primitive. The \emph{iterate} primitive 
+recursively applies the run primitive to the grid until a \emph{stopping 
+condition} is found to be true. The \emph{reduce} primitive allows us to 
+summarise the data using an associative operator allowing us to calculate 
+means, sums, minimums or maximums. This result is often used as a stopping 
+condition.
 
-Compile Ypnos to GPU
+The \emph{zip} and \emph{unzip} primitives are unrelated to the primitives 
+already mentioned above. They allow us to pair and unpair the values of two 
+grids respectively. This is useful when dealing with multiple inter-related 
+quantities as is the case in a physical system with force, acceleration and 
+velocity.
+
+Due to the declarative syntax, the author of an Ypnos program does not need to 
+worry about the method of concurrency underpinning their program. This allows 
+the implementers of Ypnos to use whichever method is most appropriate for the 
+given work load and computer. As many computers these days are equipped with 
+very advanced GPUs capable of general purpose computation, the Ypnos language 
+should be able to use these to accelerate its calculations.
 
 \section*{Starting Point}
 
-I have had experience of functional programming from the course as well as 
-having followed complete some Haskell tutorials. More familiarity with Haskell 
-will need to be developed before starting this project in earnest.
+\begin{itemize}
 
-During the course of an 11 week internship I was in charge of my own project.  
-These skill will be transferable to the planning, implementing, documenting and 
-testing needed in this project.
+\item I have had experience of functional programming from the course as well 
+as having completed some Haskell tutorials. 
 
-I have already read the Ypnos paper and familiar with the constructs of the 
-language as well its primitives.
+\item I have experience of building a compiler from Part IB supervision work.
 
-At present Ypnos has been partially implemented in a single threaded fashion on 
-the CPU. The proof-of-concept leaves many primitives including some that would 
-benefit greatly from the pipelining a GPU can provide. This implementation can 
-be taken as both the starting point and the benchmark for the new 
-implementation.
+\item During the course of an 11 week internship I learnt to plan, implement, 
+document and test my own project.
 
-A Haskell ESDL already exists for compiling array computations to CUDA code.  
-The library takes an AST and produces code to run on the GPU. We will use this 
-library as a back-end to avoid writing a compiler to CUDA code directly.
+\item I have already read the Ypnos paper and am familiar with the constructs 
+of the language as well its primitives.
+
+\item At present Ypnos has been partially implemented in a single threaded 
+fashion on the CPU. The proof-of-concept leaves many primitives unimplemented, 
+including some that would benefit greatly from the pipelining a GPU can 
+provide. This implementation can be taken as both the starting point and the 
+benchmark for the new implementation.
+
+\item A Haskell ESDL already exists for compiling array computations to CUDA 
+code. The library takes an AST and produces code to run on the GPU. We will use 
+this library as a back-end to avoid writing a compiler to CUDA code directly.
+
+\end{itemize}
 
 \section*{Resources Required}
 
-For this project I shall require my own laptop computer that runs Arch Linux 
-for the bulk of development work. Backup will be to github, the SRCF and/or the 
-MCS. Should my computer fail I will be able to use the MCS computers for the 
-project.
+\begin{itemize} 
 
-I require an Nvidia GPU in order to test the code produced. This will be 
+\item For this project I shall require my own laptop computer that runs Arch 
+Linux for the bulk of development work. 
+
+\item Backup will be to github, the SRCF and/or the MCS. Should my computer 
+fail I will be able to use the MCS computers for the project.
+
+\item I require an Nvidia GPU in order to test the code produced. This will be 
 provided by Dominic Orchard and I will have access to the machine via SSH for 
 testing purposes.
+
+\end{itemize}
 
 \section*{Work to be done}
 
@@ -93,22 +102,36 @@ The project breaks down into the following sub-projects:
 compilation pass that can take the Ypnos AST and produce a correspondent 
 ``accelerate'' AST.
 
-\item The implementation of the basic ``run'' primitive. The will possible be 
-written in the ``accelerate'' language directly.
+\item The implementation of the basic \emph{run} primitive. That may be written 
+in the ``accelerate'' language directly.
 
 \item The testing of the implementation to check that it works correctly and is 
 faster than the original. This will need a test bench to be constructed that 
-includes various well know stencil computations. E.g. the Laplace transform and 
-the Gaussian blur filter.
+includes various well know stencil computations. The test bench will include 
+the following programs as a minimum: the Game of Life, Gaussian blur, Canny 
+edge detection, and (if zip/unzip are implemented) the difference of Gaussians.
 
 \end{enumerate}
 
 \section*{Success Criterion for the Main Result}
 
-The project will be a success if it can take Ypnos code and run it using the 
-``run'' primitive on the GPU. This should also run faster than the current 
-single threaded implementation on large work loads---taking into account the 
-time required to copy data on and off the GPU.
+The project will be a success if:
+
+\begin{enumerate}
+
+\item It can compile Ypnos code and implements the \emph{run} primitive on the 
+GPU.
+
+\item It implements the \emph{reduce} primitive on the GPU.
+
+\item It is faster than the current single threaded implementation on large 
+work loads. Taking into account the time required to copy data on and off the 
+GPU.
+
+\item It does all of the above correctly (or in keeping with the reference 
+implementation).
+
+\end{enumerate}
 
 \section*{Possible Extensions}
 
@@ -119,58 +142,48 @@ this order:
 
 \begin{enumerate}
 
-\item The ``iterate'' primitive that allows the programmer to specify a 
-stopping condition and iterate ``run'' until it is achieved. This will 
-eliminate the need to copy data between the CPU and GPU at each step.
+\item The ``iterate'' primitive. This will eliminate the need to copy data 
+between the CPU and GPU at each step.
 
-\item The ``reduce'' primitive that is similar to the ``iterate'' primitive in 
-the gains achieved. However, it allows us to achieve functions such as max, 
-min, sum or mean of a grid. This is a useful stopping condition for the 
-``iterate'' primitive.
-
-\item The ``zip'' primitive that will allow the programmer to use the values 
-from multiple grids in the calculation of the next. This is particularly useful 
-in scientific applications where we are calculating multiple quantities (force, 
-direction, speed) from multiple variables.
+\item The ``zip'' primitive.
 
 \end{enumerate}
 
+I may also attempt to enhance the compiler to decide at compile-time whether to 
+use the GPU or CPU dependant on the size of computation required.
 
 \section*{Timetable: Workplan and Milestones to be achieved.}
 
 Planned starting date is 19/10/2011 when the proposal is accepted.
 
-\begin{enumerate}
-
-\item {\bf Michaelmas weeks 2-4} Learn to write and read Haskell code. Write 
+\subsection*{Michaelmas weeks 2-4} Learn to write and read Haskell code. Write 
 some programs in Ypnos. Try to understand the existing code base. 
 
-\item {\bf Michaelmas weeks 5-6} Get familiar with the ``accelerate'' ESDL by 
-reading the paper and writing some toy programs.
+\subsection*{Michaelmas weeks 5-6} Get familiar with the ``accelerate'' ESDL by 
+reading the paper and writing some toy programs. Start implementation of the 
+compiler from Ypnos to ``accelerate''.
 
-\item {\bf Michaelmas weeks 7-8} Start implementation of the compiler from 
-Ypnos to ``accelerate''.
+\subsection*{Michaelmas weeks 7-8} Continue implementation of compiler. Most 
+basic operations should translate correctly by this point.
 
-\item {\bf Michaelmas vacation} Finish the compiler and begin work on 
+\subsection*{Michaelmas vacation} Finish the compiler and begin work on 
 implementing the run primitive.
 
-\item {\bf Lent weeks 0-2} Finish the run primitive if necessary. Write the 
+\subsection*{Lent weeks 0-2} Finish the run primitive if necessary. Write the 
 progress report. Start work on the basic test bench.
 
-\item {\bf Lent weeks 3-5} Finish main test bench and run experiments. Make 
+\subsection*{Lent weeks 3-5} Finish main test bench and run experiments. Make 
 improvement to the code as necessary to achieve the main aim of the project. 
 
-\item {\bf Lent weeks 6-8} If there is time then the main extensions may be 
+\subsection*{Lent weeks 6-8} If there is time then the main extensions may be 
 implemented at this point.
 
-\item {\bf Easter vacation:} Write the main chapters of the dissertation.
+\subsection*{Easter vacation} Write the main chapters of the dissertation.
 
-\item {\bf Easter term 0-2:} Elaborate on the existing tests bench and run 
+\subsection*{Easter term 0-2} Elaborate on the existing tests bench and run 
 final experiments. Complete the dissertation.
 
-\item {\bf Easter term 3:} Proof reading and then an early submission.  
-
-\end{enumerate}
+\subsection*{Easter term 3} Proof reading and then an early submission.  
 
 
  

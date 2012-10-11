@@ -25,7 +25,17 @@ help:
 	@echo "make pr       print the dissertation"
 	@echo
 
-prop:	proposal.dvi
+proposal.ps:	$(PROP)
+	latex proposal
+	bibtex proposal
+	latex proposal
+	bibtex proposal
+	latex proposal
+	bibtex proposal
+	dvips -Ppdf -G0 -t a4 -pp 0-200 -o proposal.ps proposal.dvi
+
+proposal.pdf:	proposal.ps
+	ps2pdf proposal.ps
 
 diss.ps:	$(DISS)
 	latex diss
@@ -43,6 +53,8 @@ makefile.txt:	Makefile
 	expand Makefile >makefile.txt
 count:
 	detex diss.tex | tr -cd '0-9A-Za-z \n' | wc -w
+propcount:
+	detex propbody.tex | tr -cd '0-9A-Za-z \n' | wc -w
 
 proposal.dvi: $(PROP)
 	latex proposal

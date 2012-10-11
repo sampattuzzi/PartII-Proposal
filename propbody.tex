@@ -4,6 +4,8 @@
 
 % Main document
 
+\bibliographystyle{plain}
+
 \section*{Introduction, The Problem To Be Addressed}
 
 In recent years, Moore's law has begun to plateau. As a result the hardware 
@@ -24,9 +26,10 @@ fluid dynamics. It is also possible to highly parallelize this computation by
 splitting the grid into smaller chunks and running the stencil on each 
 separately.
 
-Ypnos is an Embedded Domain Specific Language in the Haskell programming 
-language that is capable of describing and running these kernels over a grid.  
-It defines a syntax and various primitives for the structured grid computation.  
+Ypnos \cite{ypnos} is an Embedded Domain Specific Language in the Haskell 
+programming language that is capable of describing and running these kernels 
+over a grid.  It defines a syntax and various primitives for the structured 
+grid computation.  
 
 A kernel is described using a modified Haskell function syntax. The following 
 is a kernel used to compute the Gaussian of a grid. The arguments are written 
@@ -80,8 +83,9 @@ implementation can be taken as both the starting point and the benchmark for
 the new implementation.
 
 \item A Haskell ESDL already exists for compiling array computations to CUDA 
-code. The library takes an AST and produces code to run on the GPU. I will use 
-this library as a back-end to avoid writing a compiler to CUDA code directly.
+code. The library, ``accelerate'' \cite{accel}, takes an AST and produces code
+to run on the GPU.  I will use this library as a back-end to avoid writing a 
+compiler to CUDA code directly.
 
 \end{itemize}
 
@@ -203,3 +207,5 @@ implemented at this point.
 final experiments. Complete the dissertation.
 
 \subsection*{Easter term 3} Proof reading and then an early submission.  
+
+\bibliography{refs}

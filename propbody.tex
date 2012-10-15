@@ -19,8 +19,8 @@ different hardware and methods of concurrency.
 Structured grids are a common computational pattern for scientific parallel 
 computation. They allow us to specify \emph{stencils} or \emph{kernels} which 
 are local computations that compute a new value from neighboring cells.  
-Stencils are promoted to operations over the whole array by application to 
-every index.  Many algorithms can be described in this way including the 
+Stencils can be applied to every index such as to make them a computation over 
+the whole array.  Many algorithms can be described in this way including the 
 Gaussian blur filter, edge detection as well as scientific applications such as 
 fluid dynamics. It is also possible to highly parallelize this computation by 
 splitting the grid into smaller chunks and running the stencil on each 
@@ -32,9 +32,10 @@ over a grid.  It defines a syntax and various primitives for the structured
 grid computation.  
 
 A kernel is described using a modified Haskell function syntax. The following 
-is a kernel used to compute the Gaussian of a grid. The arguments are written 
-as a grid and the central point is annotated with \verb|@|. It also denotes the 
-location where the kernels return value is written in the new grid.
+is a kernel used to compute the local average of a grid and has a blurring 
+effect.  The arguments are written as a grid and the central point is annotated 
+with \verb|@|. It also denotes the location where the kernels return value is 
+written in the new grid.
 
 \begin{verbatim}
 ave2D :: Grid (X * Y) Double -> Double
@@ -43,14 +44,15 @@ ave2D (X * Y): | _  t _ | = (t+l+c+r+b)/5.0
                | _  b _ |
 \end{verbatim}
 
-The \emph{run} primitive is used to lift the stencil to a grid operation and 
-\emph{iterate} primitive simply recursively applies run. The \emph{reduce} 
+Ypnos a number of primitive array operations. A \emph{run} primitive is used to 
+turn the stencil into a grid operation in the manner specified above. An 
+\emph{iterate} primitive simply recursively applies run.  A \emph{reduce} 
 primitive allows us to summarise the data so that we can calculate means, sums, 
-minimums or maximums. This result is often used as a stopping condition for 
+minimums or maximums.  This result is often used as a stopping condition for 
 iteration.
 
-The \emph{zip} and \emph{unzip} primitives allow us to pair and unpair the 
-values of two grids respectively. This is useful when dealing with multiple 
+A \emph{zip} and \emph{unzip} primitives allow us to pair and unpair the values 
+of two grids respectively. This is useful when dealing with multiple 
 inter-related quantities as is the case in a physical system with force, 
 acceleration and velocity.
 
@@ -176,36 +178,48 @@ use the GPU or CPU dependant on the size of computation required.
 
 Planned starting date is 19/10/2011 when the proposal is accepted.
 
-\subsection*{Michaelmas weeks 2-4} Learn to write and read Haskell code. Write 
-some programs in Ypnos. Try to understand the existing code base. Start writing 
-a unit testing suite.
+\subsection*{19$^{th}$ of October -- 4$^{th}$ of November} Learn to write and read 
+Haskell code.  Write some programs in Ypnos. Try to understand the existing 
+code base.  Start writing a unit testing suite.
 
-\subsection*{Michaelmas weeks 5-6} Finish writing the unit testing suite by 
-including Gaussian blur and Game of Life programs. Get familiar with the 
-``accelerate'' ESDL by reading the paper and writing some toy programs. 
+\subsection*{5$^{th}$ of November -- 18$^{th}$ of November} Finish writing the unit 
+testing suite by including Gaussian blur and Game of Life programs. Get 
+familiar with the ``accelerate'' ESDL by reading the paper and writing some toy 
+programs. 
 
-\subsection*{Michaelmas weeks 7-8} Start implementation of the compiler from 
-the Ypnos AST to the ``accelerate'' AST. Most basic operations should translate 
-correctly by this point.
+\subsection*{19$^{th}$ of November -- 30$^{th}$ of November} Start implementation 
+of the compiler from the Ypnos AST to the ``accelerate'' AST. Most basic 
+operations should translate correctly by this point.
 
-\subsection*{Michaelmas vacation} Finish the compiler and begin work on 
-implementing the run and reduce primitives.
+\subsection*{1$^{st}$ of December -- 16$^{th}$ of December (Christmas)} Finish 
+the compiler and begin work on implementing the run and reduce primitives.
 
-\subsection*{Lent weeks 0-2} Finish the primitives if necessary. Write the 
-progress report. Start work on the basic test bench.
+\subsection*{17$^{th}$ of December -- 6$^{th}$ of January (Christmas)} Course 
+revision and Holiday.
 
-\subsection*{Lent weeks 3-5} Finalise the main test bench and run experiments.  
-Analyse the performance and scalability of the approach. Make improvements to 
-the code as necessary to achieve the main aim of the project. 
+\subsection*{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)} Finish the 
+primitives if necessary.  Write the progress report.  Start work on the basic 
+test bench.
 
-\subsection*{Lent weeks 6-8} If there is time then the main extensions may be 
-implemented at this point.
+\subsection*{21$^{th}$ of January -- 3$^{rd}$ of February} Finalise the main 
+test bench and run experiments.  Analyse the performance and scalability of the 
+approach.  Make improvements to the code as necessary to achieve the main aim 
+of the project. 
 
-\subsection*{Easter vacation} Write the main chapters of the dissertation.
+\subsection*{4$^{th}$ of February -- 17$^{th}$ of February} If there is time then 
+the main extensions may be implemented at this point.
 
-\subsection*{Easter term 0-2} Elaborate on the existing tests bench and run 
-final experiments. Complete the dissertation.
+\subsection*{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main 
+chapters of the dissertation.
 
-\subsection*{Easter term 3} Proof reading and then an early submission.  
+\subsection*{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the existing 
+tests bench and run final experiments.  Complete the dissertation.
+
+\subsection*{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} The holiday is 
+set aside for course revision.
+
+\subsection*{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed 
+and sent to my supervisor and director of studies by the 23$^{rd}$ of April.  
+This will be followed by proof reading and then an early submission.  
 
 \bibliography{refs}

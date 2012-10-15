@@ -6,7 +6,7 @@
 
 DISS = diss.tex refs.bib propbody.tex figs/diagram.eps makefile.txt
 
-PROP = proposal.tex propbody.tex
+PROP = proposal.tex propbody.tex refs.bib
 
 help:
 	@echo
@@ -25,17 +25,12 @@ help:
 	@echo "make pr       print the dissertation"
 	@echo
 
-proposal.ps:	$(PROP)
-	latex proposal
-	bibtex proposal
-	latex proposal
-	bibtex proposal
-	latex proposal
-	bibtex proposal
-	dvips -Ppdf -G0 -t a4 -pp 0-200 -o proposal.ps proposal.dvi
 
-proposal.pdf:	proposal.ps
-	ps2pdf proposal.ps
+proposal.pdf:	$(PROP)	
+	pdflatex proposal
+	bibtex proposal
+	pdflatex proposal
+	pdflatex proposal
 
 diss.ps:	$(DISS)
 	latex diss

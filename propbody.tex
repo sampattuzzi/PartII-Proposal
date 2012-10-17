@@ -12,9 +12,9 @@ In recent years, Moore's law has begun to plateau. As a result the hardware
 industry has increasingly been turning to MIMD and SIMD architectures as a 
 solution.  Some of the highest performing SIMD implementations today are 
 provided by GPUs and can be harnessed via GPGPU languages such as CUDA and 
-OpenCL.  However, taking advantage of GPGPU is hard as it requires knowledge of 
-the low-level concepts of these languages. It is also not portable between 
-different hardware and methods of concurrency.
+OpenCL.  However, taking advantage of GPGPUs is hard as it requires knowledge 
+of the low-level concepts of these languages. Also, CUDA and OpenCL are not 
+portable between different hardware and methods of concurrency.
 
 Structured grids are a common computational pattern for scientific parallel 
 computation. They allow us to specify \emph{stencils} or \emph{kernels} which 
@@ -22,20 +22,19 @@ are local computations that compute a new value from neighboring cells.
 Stencils can be applied to every index such as to make them a computation over 
 the whole array.  Many algorithms can be described in this way including the 
 Gaussian blur filter, edge detection as well as scientific applications such as 
-fluid dynamics. It is also possible to highly parallelize this computation by 
-splitting the grid into smaller chunks and running the stencil on each 
-separately.
+fluid dynamics. The pattern is also highly parallelizable by splitting the 
+array into smaller chunks and running the stencil on each separately.
 
 Ypnos \cite{ypnos} is an Embedded Domain Specific Language in the Haskell 
 programming language that is capable of describing and running these kernels 
-over a grid.  It defines a syntax and various primitives for the structured 
-grid computation.  
+over an array.  It defines a syntax and various primitives for structured grid 
+computation.  
 
 A kernel is described using a modified Haskell function syntax. The following 
-is a kernel used to compute the local average of a grid and has a blurring 
-effect.  The arguments are written as a grid and the central point is annotated 
-with \verb|@|. It also denotes the location where the kernels return value is 
-written in the new grid.
+is a kernel used to compute the local average of an array and has a blurring 
+effect.  The arguments are written as an array and the central point is 
+annotated with \verb|@|. It also denotes the location where the kernels return 
+value is written in the new array.
 
 \begin{verbatim}
 ave2D :: Grid (X * Y) Double -> Double
@@ -44,23 +43,23 @@ ave2D (X * Y): | _  t _ | = (t+l+c+r+b)/5.0
                | _  b _ |
 \end{verbatim}
 
-Ypnos a number of primitive array operations. A \emph{run} primitive is used to 
-turn the stencil into a grid operation in the manner specified above. An 
-\emph{iterate} primitive simply recursively applies run.  A \emph{reduce} 
+Ypnos has a number of primitive array operations. A \emph{run} primitive is 
+used to turn the stencil into an array operation in the manner specified above.  
+An \emph{iterate} primitive simply recursively applies run.  A \emph{reduce} 
 primitive allows us to summarise the data so that we can calculate means, sums, 
 minimums or maximums.  This result is often used as a stopping condition for 
 iteration.
 
-A \emph{zip} and \emph{unzip} primitives allow us to pair and unpair the values 
-of two grids respectively. This is useful when dealing with multiple 
+\emph{zip} and \emph{unzip} primitives allow us to pair and unpair the values 
+of two arrays respectively. This is useful when dealing with multiple 
 inter-related quantities as is the case in a physical system with force, 
 acceleration and velocity.
 
-Due to the declarative syntax and its purity the order of application of the 
+Due to the declarative syntax and its purity, the order of application of the 
 stencils is not important. The author of an Ypnos program does not need to 
 worry about the method of concurrency underpinning their program. This allows 
 the implementers of Ypnos to use whichever method is most appropriate for the 
-given work load and computer. As many computers these days are equipped with 
+given work-load and platform. As many computers these days are equipped with 
 very advanced GPUs capable of general purpose computation, the Ypnos language 
 should be able to use these to accelerate its calculations.
 
@@ -77,15 +76,14 @@ as having completed some Haskell tutorials.
 document and test my own project.
 
 \item I have already read the Ypnos paper and am familiar with the constructs 
-of the language as well its primitives.
+of the language as well as its primitives.
 
 \item At present Ypnos has been partially implemented in a single threaded 
-fashion on the CPU. The proof-of-concept is only partially implemented. This 
-implementation can be taken as both the starting point and the benchmark for 
-the new implementation.
+fashion on the CPU. This implementation can be taken as both the starting point 
+and the benchmark for the new implementation.
 
 \item A Haskell ESDL already exists for compiling array computations to CUDA 
-code. The library, ``accelerate'' \cite{accel}, takes an AST and produces code
+code. The library, `accelerate' \cite{accel}, takes an AST and produces code
 to run on the GPU.  I will use this library as a back-end to avoid writing a 
 compiler to CUDA code directly.
 
@@ -120,11 +118,11 @@ conditionals, local let-binding, etc.
 
 \item The implementation of the main compilation. This involves writing a 
 compilation pass that can take the Ypnos AST and produce a correspondent 
-``accelerate'' AST.
+`accelerate' AST.
 
 \item The implementation of the basic \emph{run} and \emph{reduce} primitives 
 as well as any combinators for constructing and deconstructing arrays from raw 
-data. The combinators may be written in the ``accelerate'' language directly.
+data. The combinators may be written in the `accelerate' language directly.
 
 \item The testing of the implementation to check that it works correctly and is 
 faster than the original modulo data copying. This will need a test bench to be 
@@ -147,11 +145,12 @@ GPU.
 \item It implements the \emph{reduce} primitive on the GPU.
 
 \item It scales better than the current single threaded implementation on large 
-work loads. That is to say that when the domain size is increased, the 
-difference in computation time increases too. However, this must take into 
-account the time required to copy data on and off the GPU.
+work-loads. That is to say that when the input size should correlate with the 
+speed-up observed.  However, this must take into account the time required to 
+copy data on and off the GPU.
 
-\item It does all of the above correctly and passes the initial unit tests.
+\item The translation is correct, preserving the semantics of stencil 
+computations on the GPU
 
 \end{enumerate}
 
@@ -171,55 +170,63 @@ between the CPU and GPU at each step.
 
 \end{enumerate}
 
-I may also attempt to enhance the compiler to decide at compile-time whether to 
-use the GPU or CPU dependant on the size of computation required.
+I may also attempt to enhance the compiler to decide at run-time whether to use 
+the GPU or CPU dependant on the size of computation required. I will 
+investigate modelling of the GPU execution times in relation to data size and 
+stencil complexity.
 
 \section*{Timetable: Workplan and Milestones to be achieved.}
 
-Planned starting date is 19/10/2011 when the proposal is accepted.
+Planned starting date is the 19$^{th}$ of October when the proposal is 
+accepted.
 
-\subsection*{19$^{th}$ of October -- 4$^{th}$ of November} Learn to write and read 
+\begin{itemize}
+
+\item \textbf{19$^{th}$ of October -- 4$^{th}$ of November} Learn to write and read 
 Haskell code.  Write some programs in Ypnos. Try to understand the existing 
 code base.  Start writing a unit testing suite.
 
-\subsection*{5$^{th}$ of November -- 18$^{th}$ of November} Finish writing the unit 
+\item \textbf{5$^{th}$ of November -- 18$^{th}$ of November} Finish writing the unit 
 testing suite by including Gaussian blur and Game of Life programs. Get 
-familiar with the ``accelerate'' ESDL by reading the paper and writing some toy 
+familiar with the `accelerate' ESDL by reading the paper and writing some toy 
 programs. 
 
-\subsection*{19$^{th}$ of November -- 30$^{th}$ of November} Start implementation 
-of the compiler from the Ypnos AST to the ``accelerate'' AST. Most basic 
-operations should translate correctly by this point.
+\item \textbf{19$^{th}$ of November -- 30$^{th}$ of November} Start 
+implementation of the compiler from the Ypnos AST to the `accelerate' AST.  
+Most basic operations should translate correctly by this point.
 
-\subsection*{1$^{st}$ of December -- 16$^{th}$ of December (Christmas)} Finish 
+\item \textbf{1$^{st}$ of December -- 16$^{th}$ of December (Christmas)} Finish 
 the compiler and begin work on implementing the run and reduce primitives.
 
-\subsection*{17$^{th}$ of December -- 6$^{th}$ of January (Christmas)} Course 
+\item \textbf{17$^{th}$ of December -- 6$^{th}$ of January (Christmas)} Course 
 revision and Holiday.
 
-\subsection*{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)} Finish the 
+\item \textbf{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)} Finish the 
 primitives if necessary.  Write the progress report.  Start work on the basic 
 test bench.
 
-\subsection*{21$^{th}$ of January -- 3$^{rd}$ of February} Finalise the main 
+\item \textbf{21$^{th}$ of January -- 3$^{rd}$ of February} Finalise the main 
 test bench and run experiments.  Analyse the performance and scalability of the 
 approach.  Make improvements to the code as necessary to achieve the main aim 
 of the project. 
 
-\subsection*{4$^{th}$ of February -- 17$^{th}$ of February} If there is time then 
+\item \textbf{4$^{th}$ of February -- 17$^{th}$ of February} If there is time then 
 the main extensions may be implemented at this point.
 
-\subsection*{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main 
+\item \textbf{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main 
 chapters of the dissertation.
 
-\subsection*{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the existing 
-tests bench and run final experiments.  Complete the dissertation.
+\item \textbf{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the 
+existing tests bench and run final experiments.  Complete most of dissertation 
+in draft form.
 
-\subsection*{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} The holiday is 
-set aside for course revision.
+\item \textbf{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} Finish 
+dissertation. The rest of the vacation is set aside for course revision.
 
-\subsection*{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed 
-and sent to my supervisor and director of studies by the 23$^{rd}$ of April.  
-This will be followed by proof reading and then an early submission.  
+\item \textbf{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed 
+and sent to my supervisor and director of studies by the \textbf{23$^{rd}$ of 
+April}.  This will be followed by proof reading and then an early submission. 
+
+\end{itemize}
 
 \bibliography{refs}

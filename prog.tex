@@ -1,0 +1,113 @@
+%% LyX 2.0.5 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[british]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{0}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+%% You can modify the fonts used in the document be using the
+%% following macros. They take one parameter which is the font
+%% changing command.
+%% \headerfont: the font used in both headers.
+%%              Defaults to sans serif.
+%% \titlefont:  the font used for the title.
+%%              Defaults to \LARGE sans-serif semi bold condensed.
+%% \sectionfont: the font used by \section when beginning a new topic.
+%%              Defaults to sans-serif semi bold condensed.
+%% \itemfont:   the font used in descriptions of items.
+%%              Defaults to sans-serif slanted.
+% to make your name even bigger, uncomment the following line:
+% \titlefont{\Huge}
+%%
+%% You can modify the following parameters using \renewcommand:
+%% \topicmargin: the left margin inside topics.
+%%               Defaults to 20% of the column width (0.20\columnwidth).
+% To get more room for left column of Topic layouts, uncomment following line:
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+
+\subtitle{GPU Acceleration of the Ypnos Programming Language}
+
+
+\title{Progress Report}
+
+
+\author{Sam Pattuzzi (sp598@cam.ac.uk)}
+
+\maketitle
+\noindent \textbf{Project Supervisor:} D. A. Orchard \vspace{0.2in}
+
+
+\noindent \textbf{Director of Studies:} Dr A. R. Beresford \vspace{0.2in}
+ 
+
+\noindent \textbf{Project Overseers:} Dr A. Madhavapeddy \& Dr M.
+Kuhn
+
+\vfill{}
+
+
+
+\subsection*{Report}
+
+At the end of the Christmas break the project was two weeks behind schedule: of
+the two primitives that needed to be implemented by that point only one, the
+``run'' primitive, had been which left the ``reduce'' primitive. However, work
+proceeded according to the plan included below and I am now back on track.
+Work on the evaluation is well underway and producing promising results.
+
+Learning the Haskell language and getting familiar with the type system and
+concepts took longer than previously anticipated. The Haskell type system is
+highly complex with many ``extensions'' which are required for this project.
+The project was brought back on track after discovering that it would no longer
+be necessary to write a compiler from Haskell AST to Accelerate AST as they are
+one and the same. This significantly reduced the menial work without reducing
+the technical merit. However, while building the translation and primitives, I
+discovered that the types of the stencils and primitives need to be changed in
+order to be consistent with their unaccelerated counterparts. Reconciliation of
+these types took further week not previously accounted for in the plan (see
+revised plan). This leaves the evaluation to be completed before I can begin
+work on the dissertation. 
+
+So far, the following has been accomplished: learning the Haskell language;
+writing sample applications in Ypnos and Accelerate to get familiar with those;
+setting up a unit testing framework and testing the written code; translation
+from Ypnos stencil functions to Haskell functions (which are used by
+Accelerate); implementation of the ``run'' and ``reduce'' primitives; unit
+tests for the previous; informally evaluating performance on the GPU.
+
+
+\subsection*{Revised Plan}
+\begin{itemize}
+\item \textbf{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)}
+Finish the primitives if necessary. Write the progress report. Start
+work on the basic test bench.
+\item \textbf{21$^{th}$ of January -- 3$^{rd}$ of February} Finish the
+``reduce'' primitive and write unit tests to cover it. Unify the
+types such that both accelerated and unaccelerated operation appear
+the same to the user.
+\item \textbf{4$^{th}$ of February -- 17$^{th}$ of February} Finalise
+the main test bench and run experiments. Analyse the performance and
+scalability of the approach. Make improvements to the code as necessary
+to achieve the main aim of the project.
+\item \textbf{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main
+chapters of the dissertation.
+\item \textbf{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the
+existing tests bench and run final experiments. Complete most of dissertation
+in draft form.
+\item \textbf{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} Time
+to review and tweak the dissertation. The rest of the vacation is
+set aside for course revision.
+\item \textbf{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed
+and sent to my supervisor and director of studies by the \textbf{23$^{rd}$
+of April}. This will be followed by proof reading and then an early
+submission.\end{itemize}
+
+\end{document}

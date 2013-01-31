@@ -32,6 +32,12 @@ proposal.pdf:	$(PROP)
 	pdflatex proposal
 	pdflatex proposal
 
+proposal.pdf:	$(PROP)	
+	pdflatex proposal
+	bibtex proposal
+	pdflatex proposal
+	pdflatex proposal
+
 diss.ps:	$(DISS)
 	latex diss
 	bibtex diss

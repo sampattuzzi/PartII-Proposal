@@ -185,6 +185,18 @@ The map function would then looks like this:
 
     map :: (Exp a -> Exp b) -> Acc (Array sh a) -> Acc (Array sh b)
 
+Scalar operations do not support any type of iteration or recursion in order to
+prevent the asymmetric operation run time. However, most other Haskell code is
+allowed. This is achieved by the Haskell class mechanism: Accelerate provides
+instances of `Exp a` for most common classes.
+
+For example, in the support of addition, subtraction and other numerical
+operations, Accelerate provides an instance of the type class `Num`. This means
+that operations can be typed as follows:
+
+    (+) :: Num a => Exp a -> Exp a -> Exp a
+    1 + 2 + 3 :: Exp Integer
+
 [^1]: In fact, the map function is conceptually similar to stencil
 application. The difference being that stencils also take into account the
 neighbourhood of a cell to compute the next value.
@@ -192,16 +204,80 @@ neighbourhood of a cell to compute the next value.
 
 ### Stencil support ###
 
-Built in stencils
+I have already mentioned that function over scalars can be applied over a whole
+grid, the map function being an example of this. Accelerate provides support
+for stencil computations via the `stencil` function.
 
+    stencil :: Stencil sh a sten =>
+               (sten -> Exp b) ->
+               Boundary a ->
+               Acc (Array sh a) ->
+               Acc (Array sh b)
+
+    instance Stencil DIM2 a ((Exp a, Exp a, Exp a)
+                            ,(Exp a, Exp a, Exp a)
+                            ,(Exp a, Exp a, Exp a))
+
+The first parameter is a function which represent the stencil. We see that
+`sten`, the stencil pattern, takes the form of a tuple grid of `Exp a` element
+type. This allows Accelerate to use Haskell's function syntax to define stencils.
+
+The second parameter is the type of boundary. In Accelerate, the types of
+boundary allowed are fixed as opposed to Ypnos boundaries which can be fully
+specified. One of the types allowed is `Mirror` which deal with an out of
+bounds access by picking the nearest coordinate from within the array.
+
+With these two parameters we have defined an operation performs the stencil
+convolution.
 
 Learning the libraries
 ----------------------
 
+In order to get familiar with the syntax of these two libraries I decided to
+implement some sample functions in both, the main one being the average
+function we have already seen. With this I was able to familiarise myself with
+the embedded languages and prepare for the task of implementation.
+
+Furthermore, this allowed me to become familiar with the other tools I would be
+using in this project, namely:
+
+* Haskell, the programming language. Having not used this before I had to get
+  familiar with the syntax as well as some of the more advanced type system
+  features and extensions such as: *type classes*, *type families* and *data
+  families*.
+* Cabal, a build system for Haskell with automatic dependencies resolution and
+  fetching. The toy functions allowed me to test setting up a build system
+  which I would later use for the rest of the project.
+* Git, the version control system. I was already quite familiar with this
+  system before this project but it allowed me to make use of some of Git's
+  more advanced features such as *stashing*, *sub-projects* and *branching*.
+* CUDA, the drivers and library. As I do not own a machine with a CUDA enabled
+  graphics card, I was using a remote machine located in the Computer
+  Laboratory. The sample functions allowed me to set up the machine with the
+  drivers and configuration required in order to run the Accelerate library.
+
 Test driven development
 -----------------------
 
-TTD with QuickCheck
+The correctness of my implementation was a central goal from the beginning of
+the project. In order to achieve this I took a test driven approach to
+development. This meant that while writing the implementation I was
+simultaneously writing unit tests for that code. The approach allowed me to
+quickly and effectively find bugs which had not already been found by the
+Haskell type system.
+
+*QuickCheck* is Haskell's defacto standard unit testing library. In most unit
+testing libraries for other platforms, the programmer has to provide sets of
+test data for the library to check against the program. The code for generating
+this data is left to the programmer. QuickCheck takes a different
+approach. Instead of specifying testing functions which include the test
+generation, we specify properties which take the data to be tested as an
+argument. We then leave the generation of this data up to the library.
+
+QuickCheck is able to generate random testing data for most built in Haskell
+data types. For user defined types, the programmer must provide an instance of
+the class `Arbitrary` which allows QuickCheck to generate random samples for
+testing.
 
 
 Implementation

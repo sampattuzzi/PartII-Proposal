@@ -1,0 +1,358 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass scrartcl
+\begin_preamble
+%% You can modify the fonts used in the document be using the
+%% following macros. They take one parameter which is the font
+%% changing command.
+%% \headerfont: the font used in both headers.
+%%              Defaults to sans serif.
+%% \titlefont:  the font used for the title.
+%%              Defaults to \LARGE sans-serif semi bold condensed.
+%% \sectionfont: the font used by \section when beginning a new topic.
+%%              Defaults to sans-serif semi bold condensed.
+%% \itemfont:   the font used in descriptions of items.
+%%              Defaults to sans-serif slanted.
+% to make your name even bigger, uncomment the following line:
+% \titlefont{\Huge}
+%%
+%% You can modify the following parameters using \renewcommand:
+%% \topicmargin: the left margin inside topics.
+%%               Defaults to 20% of the column width (0.20\columnwidth).
+% To get more room for left column of Topic layouts, uncomment following line:
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language british
+\language_package default
+\inputencoding default
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 3cm
+\topmargin 3cm
+\rightmargin 3cm
+\bottommargin 3cm
+\secnumdepth 0
+\tocdepth 0
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subtitle
+GPU Acceleration of the Ypnos Programming Language
+\end_layout
+
+\begin_layout Title
+Progress Report
+\end_layout
+
+\begin_layout Author
+Sam Pattuzzi (sp598@cam.ac.uk)
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series bold
+Project Supervisor:
+\series default
+ D.
+ A.
+ Orchard 
+\begin_inset VSpace 0.2in
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series bold
+Director of Studies:
+\series default
+ Dr A.
+ R.
+ Beresford 
+\begin_inset VSpace 0.2in
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\series bold
+Project Overseers:
+\series default
+ Dr A.
+ Madhavapeddy & Dr M.
+ Kuhn
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace vfill
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Report
+\end_layout
+
+\begin_layout Standard
+The project is currently two weeks behind schedule: of the two primitives
+ that needed to be implemented by this point only one, the 
+\begin_inset Quotes eld
+\end_inset
+
+run
+\begin_inset Quotes erd
+\end_inset
+
+ primitive, has been which leaves the 
+\begin_inset Quotes eld
+\end_inset
+
+reduce
+\begin_inset Quotes erd
+\end_inset
+
+ primitive.
+ I estimate this will take about one week of work.
+\end_layout
+
+\begin_layout Standard
+Learning the Haskell language and getting familiar with the type system
+ and concepts took longer than previously anticipated.
+ The Haskell type system is highly complex with many 
+\begin_inset Quotes eld
+\end_inset
+
+extensions
+\begin_inset Quotes erd
+\end_inset
+
+ which are required for this project.
+ The project was brought back on track after discovering that it would no
+ longer be necessary to write a compiler from Haskell AST to Accelerate
+ AST as they are one and the same.
+ This significantly reduced the menial work without reducing the technical
+ merit.
+ However, while building the translation and primitives, I discovered that
+ the types of the stencils and primitives need to be changed in order to
+ be consistent with their unaccelerated counterparts.
+ Reconciliation of these types will probably take a further week not previously
+ accounted for in the plan.
+ As such, I have included a revised plan for the rest of the project (overleaf).
+\end_layout
+
+\begin_layout Standard
+So far, the following has been accomplished: learning the Haskell language;
+ writing sample applications in Ypnos and Accelerate to get familiar with
+ those; setting up a unit testing framework and testing the written code;
+ translation from Ypnos stencil functions to Haskell functions (which are
+ used by Accelerate); implementation of the 
+\begin_inset Quotes eld
+\end_inset
+
+run
+\begin_inset Quotes erd
+\end_inset
+
+ primitive.
+\end_layout
+
+\begin_layout Subsection*
+Revised Plan
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+7
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January -- 20
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January (Christmas)
+\series default
+ Finish the primitives if necessary.
+ Write the progress report.
+ Start work on the basic test bench.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+21
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January -- 3
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of February
+\series default
+ Finish the 
+\begin_inset Quotes eld
+\end_inset
+
+reduce
+\begin_inset Quotes erd
+\end_inset
+
+ primitive and write unit tests to cover it.
+ Unify the types such that both accelerated and unaccelerated operation
+ appear the same to the user.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+4
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February -- 17
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February
+\series default
+ Finalise the main test bench and run experiments.
+ Analyse the performance and scalability of the approach.
+ Make improvements to the code as necessary to achieve the main aim of the
+ project.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+18
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February -- 3
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of March
+\series default
+ Write the main chapters of the dissertation.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+4
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March -- 15
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March
+\series default
+ Elaborate on the existing tests bench and run final experiments.
+ Complete most of dissertation in draft form.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+16
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March -- 22
+\begin_inset Formula $^{nd}$
+\end_inset
+
+ of April (Easter)
+\series default
+ Time to review and tweak the dissertation.
+ The rest of the vacation is set aside for course revision.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+23
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of April -- 5
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of May
+\series default
+ A draft must be completed and sent to my supervisor and director of studies
+ by the 
+\series bold
+23
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of April
+\series default
+.
+ This will be followed by proof reading and then an early submission.
+\end_layout
+
+\end_body
+\end_document

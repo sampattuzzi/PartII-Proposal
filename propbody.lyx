@@ -1,0 +1,655 @@
+#LyX file created by tex2lyx 2.0.5
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding default
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\paperfontsize default
+\spacing single
+\use_hyperref 0
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% Draft #2
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% Main document
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+bibliographystyle{plain}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+
+Introduction, The Problem To Be Addressed
+\end_layout
+
+\begin_layout Standard
+
+In recent years, Moore's law has begun to plateau. As a result the hardware industry has increasingly been turning to MIMD and SIMD architectures as a solution. Some of the highest performing SIMD implementations today are provided by GPUs and can be harnessed via GPGPU languages such as CUDA and OpenCL. However, taking advantage of GPGPUs is hard as it requires knowledge of the low-level concepts of these languages. Also, CUDA and OpenCL are not portable between different hardware and methods of concurrency.
+\end_layout
+
+\begin_layout Standard
+
+Structured grids are a common computational pattern for scientific parallel computation. They allow us to specify 
+\emph on
+stencils
+\emph default
+ or 
+\emph on
+kernels
+\emph default
+ which are local computations that compute a new value from neighboring cells. Stencils can be applied to every index such as to make them a computation over the whole array. Many algorithms can be described in this way including the Gaussian blur filter, edge detection as well as scientific applications such as fluid dynamics. The pattern is also highly parallelizable by splitting the array into smaller chunks and running the stencil on each separately.
+\end_layout
+
+\begin_layout Standard
+
+Ypnos 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "ypnos"
+
+\end_inset
+
+ is an Embedded Domain Specific Language in the Haskell programming language that is capable of describing and running these kernels over an array. It defines a syntax and various primitives for structured grid computation.
+\end_layout
+
+\begin_layout Standard
+
+A kernel is described using a modified Haskell function syntax. The following is a kernel used to compute the local average of an array and has a blurring effect. The arguments are written as an array and the central point is annotated with 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|@|
+\end_layout
+
+\end_inset
+
+. It also denotes the location where the kernels return value is written in the new array.
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ ave2D :: Grid (X * Y) Double -> Double ave2D (X * Y): |  t  | = (t+l+c+r+b)/5.0 | l @c r | |  b  | 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Ypnos has a number of primitive array operations. A 
+\emph on
+run
+\emph default
+ primitive is used to turn the stencil into an array operation in the manner specified above. An 
+\emph on
+iterate
+\emph default
+ primitive simply recursively applies run. A 
+\emph on
+reduce
+\emph default
+ primitive allows us to summarise the data so that we can calculate means, sums, minimums or maximums. This result is often used as a stopping condition for iteration.
+\end_layout
+
+\begin_layout Standard
+
+
+\emph on
+zip
+\emph default
+ and 
+\emph on
+unzip
+\emph default
+ primitives allow us to pair and unpair the values of two arrays respectively. This is useful when dealing with multiple inter-related quantities as is the case in a physical system with force, acceleration and velocity.
+\end_layout
+
+\begin_layout Standard
+
+Due to the declarative syntax and its purity, the order of application of the stencils is not important. The author of an Ypnos program does not need to worry about the method of concurrency underpinning their program. This allows the implementers of Ypnos to use whichever method is most appropriate for the given work-load and platform. As many computers these days are equipped with very advanced GPUs capable of general purpose computation, the Ypnos language should be able to use these to accelerate its calculations.
+\end_layout
+
+\begin_layout Section*
+
+Starting Point
+\end_layout
+
+\begin_layout Itemize
+
+I have had experience of functional programming from the course as well as having completed some Haskell tutorials.
+\end_layout
+
+\begin_layout Itemize
+
+I have experience of building a compiler from Part IB supervision work.
+\end_layout
+
+\begin_layout Itemize
+
+During the course of an 11 week internship I learnt to plan, implement, document and test my own project.
+\end_layout
+
+\begin_layout Itemize
+
+I have already read the Ypnos paper and am familiar with the constructs of the language as well as its primitives.
+\end_layout
+
+\begin_layout Itemize
+
+At present Ypnos has been partially implemented in a single threaded fashion on the CPU. This implementation can be taken as both the starting point and the benchmark for the new implementation.
+\end_layout
+
+\begin_layout Itemize
+
+A Haskell ESDL already exists for compiling array computations to CUDA code. The library, `accelerate' 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "accel"
+
+\end_inset
+
+, takes an AST and produces code to run on the GPU. I will use this library as a back-end to avoid writing a compiler to CUDA code directly.
+\end_layout
+
+\begin_layout Section*
+
+Resources Required
+\end_layout
+
+\begin_layout Itemize
+
+For this project I shall require my own laptop computer that runs Arch Linux for the bulk of development work.
+\end_layout
+
+\begin_layout Itemize
+
+Backup will be to github, the SRCF and/or the MCS. Should my computer fail I will be able to use the MCS computers for the project.
+\end_layout
+
+\begin_layout Itemize
+
+I require an Nvidia GPU in order to test the code produced. This will be provided by Dominic Orchard and I will have access to the machine via SSH for testing purposes.
+\end_layout
+
+\begin_layout Section*
+
+Work to be done
+\end_layout
+
+\begin_layout Standard
+
+The project breaks down into the following sub-projects:
+\end_layout
+
+\begin_layout Enumerate
+
+Write unit tests that can be used to check the correctness of my implementation. The tests will cover micro aspects of the programming language such as: constants, unary application, binary application, indexing, conditionals, local let-binding, etc.
+\end_layout
+
+\begin_layout Enumerate
+
+The implementation of the main compilation. This involves writing a compilation pass that can take the Ypnos AST and produce a correspondent `accelerate' AST.
+\end_layout
+
+\begin_layout Enumerate
+
+The implementation of the basic 
+\emph on
+run
+\emph default
+ and 
+\emph on
+reduce
+\emph default
+ primitives as well as any combinators for constructing and deconstructing arrays from raw data. The combinators may be written in the `accelerate' language directly.
+\end_layout
+
+\begin_layout Enumerate
+
+The testing of the implementation to check that it works correctly and is faster than the original modulo data copying. This will need a test bench to be constructed that includes various well know stencil computations. The test bench will include the following programs as a minimum: the Game of Life, Gaussian blur, Canny edge detection, and (if zip/unzip are implemented) the difference of Gaussians.
+\end_layout
+
+\begin_layout Section*
+
+Success Criterion for the Main Result
+\end_layout
+
+\begin_layout Standard
+
+The project will be a success if:
+\end_layout
+
+\begin_layout Enumerate
+
+It can compile Ypnos code and implements the 
+\emph on
+run
+\emph default
+ primitive on the GPU.
+\end_layout
+
+\begin_layout Enumerate
+
+It implements the 
+\emph on
+reduce
+\emph default
+ primitive on the GPU.
+\end_layout
+
+\begin_layout Enumerate
+
+It scales better than the current single threaded implementation on large work-loads. That is to say that when the input size should correlate with the speed-up observed. However, this must take into account the time required to copy data on and off the GPU.
+\end_layout
+
+\begin_layout Enumerate
+
+The translation is correct, preserving the semantics of stencil computations on the GPU
+\end_layout
+
+\begin_layout Section*
+
+Possible Extensions
+\end_layout
+
+\begin_layout Standard
+
+If the main aim for this project is achieved then I shall try to implement further primitives of the Ypnos language. The programmer will then be able to take advantage of the speed gains of the GPU pipeline. I will attempt them in this order:
+\end_layout
+
+\begin_layout Enumerate
+
+The 
+\begin_inset Quotes eld
+\end_inset
+
+iterate
+\begin_inset Quotes erd
+\end_inset
+
+ primitive. This will eliminate the need to copy data between the CPU and GPU at each step.
+\end_layout
+
+\begin_layout Enumerate
+
+The 
+\begin_inset Quotes eld
+\end_inset
+
+zip
+\begin_inset Quotes erd
+\end_inset
+
+ primitive.
+\end_layout
+
+\begin_layout Standard
+
+I may also attempt to enhance the compiler to decide at run-time whether to use the GPU or CPU dependant on the size of computation required. I will investigate modelling of the GPU execution times in relation to data size and stencil complexity.
+\end_layout
+
+\begin_layout Section*
+
+Timetable: Workplan and Milestones to be achieved.
+\end_layout
+
+\begin_layout Standard
+
+Planned starting date is the 19
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of October when the proposal is accepted.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+19
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of October -- 4
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of November
+\series default
+ Learn to write and read Haskell code. Write some programs in Ypnos. Try to understand the existing code base. Start writing a unit testing suite.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+5
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of November -- 18
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of November
+\series default
+ Finish writing the unit testing suite by including Gaussian blur and Game of Life programs. Get familiar with the `accelerate' ESDL by reading the paper and writing some toy programs.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+19
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of November -- 30
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of November
+\series default
+ Start implementation of the compiler from the Ypnos AST to the `accelerate' AST. Most basic operations should translate correctly by this point.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+1
+\begin_inset Formula $^{st}$
+\end_inset
+
+ of December -- 16
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of December (Christmas)
+\series default
+ Finish the compiler and begin work on implementing the run and reduce primitives.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+17
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of December -- 6
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January (Christmas)
+\series default
+ Course revision and Holiday.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+7
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January -- 20
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January (Christmas)
+\series default
+ Finish the primitives if necessary. Write the progress report. Start work on the basic test bench.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+21
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of January -- 3
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of February
+\series default
+ Finalise the main test bench and run experiments. Analyse the performance and scalability of the approach. Make improvements to the code as necessary to achieve the main aim of the project.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+4
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February -- 17
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February
+\series default
+ If there is time then the main extensions may be implemented at this point.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+18
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of February -- 3
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of March
+\series default
+ Write the main chapters of the dissertation.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+4
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March -- 15
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March
+\series default
+ Elaborate on the existing tests bench and run final experiments. Complete most of dissertation in draft form.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+16
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of March -- 22
+\begin_inset Formula $^{nd}$
+\end_inset
+
+ of April (Easter)
+\series default
+ Finish dissertation. The rest of the vacation is set aside for course revision.
+\end_layout
+
+\begin_layout Itemize
+
+
+\series bold
+23
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of April -- 5
+\begin_inset Formula $^{th}$
+\end_inset
+
+ of May
+\series default
+ A draft must be completed and sent to my supervisor and director of studies by the 
+\series bold
+23
+\begin_inset Formula $^{rd}$
+\end_inset
+
+ of April
+\series default
+. This will be followed by proof reading and then an early submission.
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "refs"
+options "plain"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_body
+\end_document

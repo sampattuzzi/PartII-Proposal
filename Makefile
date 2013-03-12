@@ -6,6 +6,8 @@
 
 DISS = diss.md Makefile
 
+pandoc = /home/sam/.cabal/bin/pandoc
+
 PROP = proposal.tex propbody.tex refs.bib
 
 help:
@@ -26,7 +28,7 @@ proposal.pdf:	$(PROP)
 	pdflatex proposal
 
 diss.pdf:	$(DISS)
-	pandoc diss.md -o diss.pdf -V geometry:"margin=1in"
+	$(pandoc) diss.md -o diss.pdf -V geometry:"margin=1in"
 
 diss:		diss.pdf
 	evince diss.pdf &

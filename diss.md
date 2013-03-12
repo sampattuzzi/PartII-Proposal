@@ -361,7 +361,7 @@ difference between the implementations and maintain the semblance of the
 types. I explored each of these approaches in the course of the project and I
 would like to now describe the benefits and drawbacks of both.
 
-### A type system approach ###
+### A type system approach {#type-sys}
 
 As we saw in the previous section: the types of the Ypnos CPU stencil and the
 Accelerate library's stencil differ wildly. Let's a closer look at the precise
@@ -536,9 +536,8 @@ allows our stencil functions to have the type:
    stencil' :: Comonad g => g a `arr` b
 
 Because of the arrow type, `stencil` and `stencil'` can actually have the same
-type.  Type classes in Haskell must always parametrize on at least one type but
-it is also possible to have more than one. I take advantage of this to provide
-extract parts of the type that change between implementations of the primitives
+type.
+
 However, we are only half-way there: the type of stencil accepted by Accelerate
 is still not of the form `g (Exp a) -> Exp b`. I achieve this stencil by a
 conversion function which builds an Accelerate stencil (call it *stencil A*) at
@@ -623,10 +622,71 @@ translation (see the section on [run-time stencil translation](#run-time)).
 
 The first approach to solving this problem makes use of the fact that Haskell
 type classes can be parametrized on more than one type. This allows us to
-extract parts of the type that change to give a (semi-)unified type.
+extract parts of the type that change to give a (semi-)unified type. As the
+reduce primitive was the first to bring about such issues lets examine how this
+approach can be applied to it.
+
+    class ReduceGrid grid a b c | grid -> a,
+                                  grid -> b,
+                                  grid -> c where
+        reduceG :: Reducer a b c-> grid -> c
+
+    data Reducer a b c where
+        Reducer ::   (a -> b -> b)
+                  -> (b -> b -> b)
+                  -> b
+                  -> (b -> c)
+                  -> Reducer a b c
+
+    instance ReduceGrid CPUGrid a b c
+    instance ReduceGrid GPUGrid (Exp a) (Exp b) (Exp c)
+
+    class RunGrid grid sten | grid -> sten where
+        runG :: sten -> grid -> grid
+
+    instance RunGrid CPUGrid CPUStencil
+    instance RunGrid GPUGrid GPUStencil
+
+In this approach we are able to have instances for `Reducer` for the CPU and GPU
+based on the grid type yet we also change the types of values accepted by the
+funtcions of the reducer. These values correspond to different types of
+functions which is what tells Haskell to use the Accelerate overloaded versions
+of operators.
+
+We also see that the `RunGrid` type class is treated in a similar manner: the
+type of grid uniquely determines the type of stencil function required
+[^fundeps]. Unlike the `reduceG` example, Haskell cannot, without help from the
+programmer, choose a different quasiquoter (as is required with the
+[static approach](#type-sys)). With the run-time approach we may be able to do
+better but we will see this later. (TODO: ensure this forward reference holds)
+
+[^fundeps]: The notation that denotes this in Haskell is `grid -> sten`. We see
+this a couple of times in the given example.
+
+So in theory this approach should work however, we encounter problems with the
+useability of this approach. Let's further examine the the type of the `reduceG`
+primitive when applied to `GPUGrid`s:
+
+    Reducer :: (Exp a -> Exp b -> Exp b)
+            -> (Exp b -> Exp b -> Exp b)
+            -> (Exp b) -- Default value
+            -> (Exp b -> Exp c)
+            -> Reducer (Exp a) (Exp b) (Exp c)
+    reduceG :: Reducer (Exp a) (Exp b) (Exp c)
+            -> GPUGrid
+            -> Exp c -- Return value
+
+Notice that both the return value and default value have type `Exp` which is
+problematic as *lifting* and *unlifting* is not easy for the user to do and the
+wrapped value is not particularly useful or meaningful. One approach to changing
+this would be to introduce dependant type parameters for the functions rather
+than the values and this could work however, I actually took the following
+approach.
 
 ### Associated type families
+
 ### Associated data families
+
 ### Final implementation
 
 TODO: run implementation

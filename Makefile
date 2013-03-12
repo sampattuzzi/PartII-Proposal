@@ -4,7 +4,7 @@
 # Note that continuation lines require '\'
 # and that TAB is used after ':' and before unix commands.
 
-DISS = diss.md
+DISS = diss.md Makefile
 
 PROP = proposal.tex propbody.tex refs.bib
 
@@ -26,7 +26,7 @@ proposal.pdf:	$(PROP)
 	pdflatex proposal
 
 diss.pdf:	$(DISS)
-	pandoc diss.md -o diss.pdf
+	pandoc diss.md -o diss.pdf -V geometry:"margin=1in"
 
 diss:		diss.pdf
 	evince diss.pdf &

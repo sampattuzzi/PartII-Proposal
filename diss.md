@@ -498,7 +498,7 @@ be described at a general level without being concerned about the number of
 dimensions actually involved.
 
 
-### A run-time approach ###
+### A run-time approach ### {#run-time}
 
 The second approach to the translation of stencils was to keep the types the
 same (or similar, as we will see) to Ypnos' original implementation. This is
@@ -525,7 +525,33 @@ The data constructor is paramatrized on both `g a` and `b`. To build up an
 instance of `arr` we must pass in the stencil function to a special
 constructor. The constructor chosen decides the implementation used.
 
+While previously we had to use different versions of the quasiquoter to produce
+different stencils at compile-time, we now use the same quasiquoter but convert
+the function at run-time. We achieve this by taking advantage of Haskell's
+polymorphism which allows a function over type `a` to generalise to a function
+of type `Exp a`. This generalisation in concert with the arrow data constructor
+allows our stencil functions to have the type:
+
+   stencil :: Comonad g => g (Exp a) -> Exp b
+   stencil' :: Comonad g => g a `arr` b
+
+Because of the arrow type, `stencil` and `stencil'` can actually have the same
+type.  Type classes in Haskell must always parametrize on at least one type but
+it is also possible to have more than one. I take advantage of this to provide
+extract parts of the type that change between implementations of the primitives
+However, we are only half-way there: the type of stencil accepted by Accelerate
+is still not of the form `g (Exp a) -> Exp b`. I achieve this stencil by a
+conversion function which builds an Accelerate stencil (call it *stencil A*) at
+run-time using the stencil encapsulated in the arrow data type (call it *stencil
+B*). Stencil A's arguments are used to build up a grid of type `g (Exp a)` then
+stencil B is used on this grid to produce the result of type `Exp b`.
+
+While this run-time conversion creates an overhead it also, as we have seen,
+simplifies the types significantly. However TODO: mention deforestation.
+
 ## Implementation of the primitives
+
+TODO: rewrite
 
 The primitives are the second central component of the translation. Without them
 we could not run our translated stencils on the GPU. Like the stencil
@@ -537,6 +563,8 @@ to change too much of their code between implementations. This led to the second
 approach of extracting the functionality of the primitive into a type
 class. This approach required the use of some complicated type features in order
 to make the types unify. However, the final result is much more usable.
+
+### Non unifying approach
 
 The initial of run was linked to the compile time implementation of the stencil
 function. At the highest level this meant that the function `run` had the
@@ -565,11 +593,38 @@ TODO: Type generalization approaches
 
 TODO: Associated types vs type synonyms
 
-### Non unifying approach
-
 TODO: run example
 
+### Type classes
+
+In this project I am aiming both to make and accurate and fast translation as
+well as one which is easy for the programmer to use. Practically, this means
+that converting between CPU and GPU implementations of the same program should
+require minimal code changes. With the previous approach we saw this did not
+work for two reasons: (a) the run primitive I implemented was not related (as
+far as Haskell was concerned) to the original CPU primitive, and (b) the types
+of the two primitives differed which could cause compilation to fail if they
+were swapped.
+
+What would be nice is to have one function which behaves differently under
+certain program conditions. The perfect tool for this job is adhoc polymorphism
+which is provided in Haskell via type classes. The result is an implementation
+of the primitive which changes dependant on a particular type parameter. The
+obvious parameter in our case is the grid type as this is common to all Ypnos
+primitives and so can universally (across all primitives) define whether to use
+a CPU, GPU or other backend.
+
+We have seen this before in some of the code examples I have used the notation:
+"Comonad g" to refer to a grid which implements the primitives of Ypnos. This is
+the same thing. However, we run into the same problems as with stencil
+translation (see the section on [run-time stencil translation](#run-time)).
+
 ### Type class parameter
+
+The first approach to solving this problem makes use of the fact that Haskell
+type classes can be parametrized on more than one type. This allows us to
+extract parts of the type that change to give a (semi-)unified type.
+
 ### Associated type families
 ### Associated data families
 ### Final implementation

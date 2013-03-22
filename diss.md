@@ -726,24 +726,74 @@ TODO: Example of usage and replacement
 
 # Evaluation
 
-## Approach
+The main aims of this project were to produce a correct translation and speed up
+over the CPU implementation. In order to test these two goals I have implemented
+unit testing through out the course of this project and implemented an
+evaluation suite of programs. The GPU is a type of co-processor and as a result
+incurs an overhead for copying results to and from its local memory. In
+evaluating the speed up of using the GPU I have to account for this.
 
-TODO: Measure of difficulty
+## Speed-up
 
-TODO: measuring copy on/off
+Before embarking on the evaluation I postulated that the GPU should provide a
+speed up over the CPU due to its capacity for parallel computation. Seeing as
+the stencil computation is highly data parallel it is a perfect fit for the SIMD
+parallelism of the GPU. More specifically, I expected that: as grid sizes
+increased the run time of the computation would increase less quickly in the GPU
+case compared with the CPU case.
 
-## Results
+To measure the run-time I made use of a library called *Criterion* which
+provides functions for:
+
+* Estimating the cost of a single call to the `clock` function. Which does the
+  timing of the CPU.
+* Estimating the clock resolution.
+* Running Haskell functions and timing them discounting the above variations in
+  order to get a sample of data.
+* Analysing the sample using *bootstrapping*[TODO: link to paper] to calculate
+  the mean and confidence interval.
+
+In my experimental setup I am using a confidence interval of 95% and a sample
+size of 100 and a resample size of 100,000. The result from Criterion is a mean
+with a confidence interval of 95%. I will use these results to compare the
+performance of the various functions implemented.
+
+### Overhead
+
+In order to show this I must first discount the effect of copying to and from
+the GPU. This was done via an `id` function implemented in Accelerate. The
+effect of which is to copy the data from the CPU to the GPU, perform no
+operations there then copy the data back. This will allow us to have a baseline
+measure of how fast our computations could be without this overhead.
+
+### Benchmark suite
+
+The benchmark suite must test both the speed-up of both primitives: `run` and
+`reduce`. For this I have implemented a set of functions representative
+functions for each to test speed across a representative set of
+calculations. These functions include:
+
+* **The average stencil** [ref] that we have seen in the previous. This
+  function is representative of convolution style operations which we may wish
+  to perform on the data. It operates over floating point numbers which is a
+  common use case for scientific computing
+* **The Game of Life stencil** makes use of various boolean functions as well as
+  externally declared functions used to count the number of *true* values in a
+  list.
+* **The sum** and **mean reduction functions** which constitute two of the most
+  common reduction operations over grids.
 
 TODO: Speed up run
 
 TODO: Reduce
 
-## Deducing a model
+### Deducing a model
 
 TODO: Model of on/off
 
+## Unit testing
 
-## Useability to the programmer
+### Useability to the programmer
 
 TODO: User having to write types
 

@@ -449,7 +449,7 @@ exist. However, this was not the case and I would have had to write these
 myself. This made the point of the intermediary stage of arrays altogether
 pointless.
 
-#### Direct approach
+#### Direct approach {#direct}
 
 The third and final approach was to operate directly on the lists extracted from
 the `GridPattern` types. As I already mentioned: the problem with working with
@@ -659,6 +659,56 @@ than the values and this could work however, I actually took the following
 approach.
 
 ### Associated type families
+
+We already encountered associated type families in the section on
+[direct translation]{#direct}. Here we will use these same type families to
+achieve the different function types we are looking for.
+
+The ideal type for the `Reducer` in the GPU implentation would be:
+
+    Reducer :: (Exp a -> Exp b -> Exp b)
+            -> (Exp b -> Exp b -> Exp b)
+            -> b
+            -> (Exp b -> Exp c)
+    reduceG :: Reducer a b c -> GPUGrid -> c
+
+Clearly this is an improvement to the user as they get a simple value they know
+what to do with. By examining this we can deduce that there are actually two of
+abstract function involved: 1 arguments functions of `Exp`s and 2 argument. If
+we implement these we as two associated type families we get the behaviour we
+want:
+
+    Reducer :: Fun2 g a b b
+            -> Fun2 g b b b
+            -> b
+            -> Fun1 g b c
+
+    class ReduceGrid g where
+        type Fun1 g a b
+        type Fun2 g a b c
+        reduceG :: Reducer g a b c -> g -> c
+
+Next I wanted to extend this approach to run. However, with the run primitive we
+do not simply have a conversion of types but also conditions on those types
+(called contexts in Haskell). It is possible to encode contexts in a type family
+method using a Haskell language extension called *ConstraintKinds*. This allows
+us to define a type family has the *kind* of `Constraint` instead of the usual
+`*` (denoting type). Here is an example of the `RunGrid` class modified in this
+way:
+
+    class RunGrid g where
+        type ConStencil g a b sten :: Constraint
+        type Stencil g a b sten :: *
+        run :: ConStencil g a b => (Stencil g a b) -> g x -> g y
+
+    instance RunGrid g where
+        type ConStencil g a b sten = (Stencil sh a ~ sten, ShapeOf g ~ sh)
+        type Stencil g a b sten = sten -> Exp b
+
+NEXT: exposed sten. Not very nice or general
+
+
+
 
 ### Associated data families
 

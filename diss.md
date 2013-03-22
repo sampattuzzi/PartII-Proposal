@@ -18,40 +18,15 @@ In summary the opperation behaves similarly to convolution.
 
 The idiom is particularly useful in the fields of graphical processing where
 some typical applications include: Gaussian blur, Laplacian of Gaussian, Canny
-edge detection and many other filter based methods. Stencils can also be used
-to computer approximations of differential systems of equations. As such they
-are useful in the simulation of physical systems via fluid, stress or heat
-dynamics.
+edge detection and many other filter based methods. Stencils can also be used to
+computer approximations of differential systems of equations. As such they are
+useful in the simulation of physical systems via fluid, stress or heat dynamics.
 
 Ypnos is an *embedded domain specific language*(EDSL) for stencil computations.
 Rather than build a language from scratch, it is embedded within the Haskell
 programming language. This allows Ypnos to share much of the syntax and
 implementation of its host language. Haskell is a particularly good fit for
-stencil computations as Ypnos syntax as it is a pure functional language. Its
-purity allow
-The idiom is particularly useful in the fields of graphical processing where
-some typical applications include: Gaussian blur, Laplacian of Gaussian, Canny
-edge detection and many other filter based methods. Stencils can also be used
-to computer approximations of differential systems of equations. As such they
-are useful in the simulation of physical systems via fluid, stress or heat
-dynamics.
-
-Ypnos is an *embedded domain specific language*(EDSL) for stencil computations.
-Rather than build a language from scratch, it is embedded within the Haskell
-programming language. This allows Ypnos to share much of the syntax and
-implementation of its host language. Haskell is a particularly good fit for
-stencil computations as Ypnos syntax as it i The idiom is particularly useful in
-the fields of graphical processing where some typical applications include:
-Gaussian blur, Laplacian of Gaussian, Canny edge detection and many other filter
-based methods. Stencils can also be used to computer approximations of
-differential systems of equations. As such they are useful in the simulation of
-physical systems via fluid, stress or heat dynamics.
-
-Ypnos is an *embedded domain specific language*(EDSL) for stencil computations.
-Rather than build a language from scratch, it is embedded within the Haskell
-programming language. This allows Ypnos to share much of the syntax and
-implementation of its host language. Haskell is a particularly good fit for
-stencil computations as Ypnos syntax as it is the programmer to write parallel
+stencil computations as its purity allows the programmer to write parallel
 programs without worrying about the interaction and sharing of state.
 
 ### Syntax ###

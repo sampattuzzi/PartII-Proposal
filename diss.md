@@ -1,16 +1,12 @@
+% GPU Accelerating the Ypnos Programming Language
+% Samuel Pattuzzi
+% March 2013
+
 # Introduction
-
-# Preparation
-
-TODO: Summarise section
-
-TODO: Make more discursive, story like.
-
-TODO: Why am I doing all this?
 
 ## Ypnos
 
-*Stencil computations* are an idiom used in parallel programming.  They work by
+*Stencil computations* are an idiom used in parallel programming. They work by
 defining a *kernel* (or *stencil*) which is applied to each element of an array
 of data (which I will call a *grid*). The kernel computes a new value for the
 array location using the old value and the old values of its neighboring cells.
@@ -29,16 +25,14 @@ implementation of its host language. Haskell is a particularly good fit for
 stencil computations as its purity allows the programmer to write parallel
 programs without worrying about the interaction and sharing of state.
 
-### Syntax ###
+### Syntax
 
 The Ypnos language provides a custom syntax for defining stencil functions as
 well as a collection of primative operations for their manipulation and use.
 
 The syntax for a simple averaging stencil would look as follows:
 
-    avg2D = [fun| X*Y:|_  a _|
-                      |b @c d|
-                      |_  e _| -> (a + b + c + d + e )/5|]
+    avg2D = [fun| X*Y:|_ a _| |b @c d| |_ e _| -> (a + b + c + d + e )/5|]
 
 Ypnos uses the *quasiquoting mechanism* in Haskell to provide its syntax. It
 essentially allows the programmer to provide a parser and enter the custom
@@ -60,35 +54,34 @@ The final section of the syntax comes after `->` and is the computation. This
 can be most Haskell syntax though recursion and function definition is not
 possible.
 
-### Primitives ###
+### Primitives
 
 As well as the syntax for stencil functions, Ypnos provides a library of
 primative operations. The primatives allow the programmer to combine the
-stencils with grids to produce the computations they want. The main primative
-in Ypnos is the *run* primative which applies the stencil computation to a
-grid.
+stencils with grids to produce the computations they want. The main primative in
+Ypnos is the *run* primative which applies the stencil computation to a grid.
 
     run :: (Grid D a -> b) -> Grid D a -> Grid D b
 
-The application is done by moving the stencil cursor over each location
-in the grid. The arguments of the stencil are taken from positions in the grid
-relative to the cursor. The value is then computed using the specified
-computation and put into the same cursor location in a *new* grid.
+The application is done by moving the stencil cursor over each location in the
+grid. The arguments of the stencil are taken from positions in the grid relative
+to the cursor. The value is then computed using the specified computation and
+put into the same cursor location in a *new* grid.
 
-TODO: Say something about the argument being Grid D a.
-n
-In some locations near the edge of the grid their may not be enough neighbors
-to satisfy a stencil. In this case Ypnos provides a special syntax for dealing
-with these *boundaries*. I have considered the implementation of boundaries
-beyond the scope of this project however I will include a brief description of
-their behaviour.
+pppTODO: Say something about the argument being Grid D a.
+
+In some locations near the edge of the grid their may not be enough neighbors to
+satisfy a stencil. In this case Ypnos provides a special syntax for dealing with
+these *boundaries*. I have considered the implementation of boundaries beyond
+the scope of this project however I will include a brief description of their
+behaviour.
 
 For each boundary of the grid outside of which the run primative may need to
 access we define a behaviour. We may compute a value for these locations using:
-the current location index, values from the grid (accessed via a specially
-bound variable). A common boundary is the *mirror* boundary which works by
-providing the closest value inside the grid when an outside access is made.
-This is the boundary that I have tacitly assumed in my implementation.
+the current location index, values from the grid (accessed via a specially bound
+variable). A common boundary is the *mirror* boundary which works by providing
+the closest value inside the grid when an outside access is made. This is the
+boundary that I have tacitly assumed in my implementation.
 
 Another vital primative of the Ypnos language is the *reduce* primative whose
 purpose is to summarise the contents of a grid in one value. It may be used to
@@ -100,12 +93,8 @@ The primative uses an associative operator (of type `a -> a -> a`) to combine
 all the elements of the grid to one value. A more general version of this
 operator also exists which support an intermediary type.
 
-    reduceR :: Reducer a b -> Grid D a -> a
-    mkReducer :: exists b. (a -> b -> b)
-                        -> (b -> b -> b)
-                        -> b
-                        -> (b -> c)
-                        -> Reducer a
+    reduceR :: Reducer a b -> Grid D a -> a mkReducer :: exists b. (a -> b -> b)
+    -> (b -> b -> b) -> b -> (b -> c) -> Reducer a
 
 The *Reducer* data type takes parameters:
 
@@ -115,8 +104,17 @@ The *Reducer* data type takes parameters:
 * and a conversion from a partial value to the final value.
 
 This the Reducer is passed into the *reduceR* primitive taking the place of our
-associative operator in the reduce primitive. Clearly, reduce can be
-implemented in terms of reduceR and so the later is the more general.
+associative operator in the reduce primitive. Clearly, reduce can be implemented
+in terms of reduceR and so the later is the more general.
+
+
+# Preparation
+
+TODO: Summarise section
+
+TODO: Make more discursive, story like.
+
+TODO: Why am I doing all this?
 
 ## Accelerate
 
@@ -431,7 +429,6 @@ and a tuple of tuples in the 2D case. This representation contains no
 information about which variables are cursors as we discussed in the previous
 section.
 
-
 #### Intermediate approaches
 
 The first approach taken involved converting first from grid patterns into
@@ -558,16 +555,6 @@ Similar problems would have plagued the implementation of the `reduce`
 primitive. However, having seen the first implementation of the `run` primitive
 I decided that a different approach was need so this incarnation of the `reduce`
 primitive never saw the light of day.
-
-TODO: Reduce implementation and the trick to it.
-
-TODO: Generalisation of functions
-
-TODO: Type generalization approaches
-
-TODO: Associated types vs type synonyms
-
-TODO: run example
 
 ### Type classes
 
@@ -706,9 +693,6 @@ way:
         type Stencil g a b sten = sten -> Exp b
 
 NEXT: exposed sten. Not very nice or general
-
-
-
 
 ### Associated data families
 

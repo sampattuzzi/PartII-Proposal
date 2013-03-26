@@ -3,30 +3,8 @@
 \usepackage{lmodern}
 \usepackage{calc}
 \usepackage{amssymb,amsmath}
-\usepackage{ifxetex,ifluatex}
-\usepackage{fixltx2e} % provides \textsubscript
-% use upquote if available, for straight quotes in verbatim environments
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
-  \usepackage[utf8]{inputenc}
-\else % if luatex or xelatex
-  \usepackage{fontspec}
-  \ifxetex
-    \usepackage{xltxtra,xunicode}
-  \fi
-  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-  \newcommand{\euro}{€}
-\fi
-% use microtype if available
-\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage[unicode=true]{hyperref}
 \usepackage{longtable}
-\ifxetex
-  \usepackage[setpagesize=false, % page size defined by xetex
-              unicode=false, % unicode breaks when used with xetex
-              xetex]{hyperref}
-\else
-  \usepackage[unicode=true]{hyperref}
-\fi
 \hypersetup{breaklinks=true,
             bookmarks=true,
             pdfauthor={Samuel Pattuzzi},
@@ -39,36 +17,55 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
-\setcounter{secnumdepth}{5}
+\setcounter{secnumdepth}{2}
 %\setcounter{secnumdepth}{0}
 
-%Environment to change margins for one page.
-\newenvironment{changemargin}[2]{%
-\begin{list}{}{%
-\setlength{\topsep}{0pt}%
-\setlength{\leftmargin}{#1}%
-\setlength{\rightmargin}{#2}%
-\setlength{\listparindent}{\parindent}%
-\setlength{\itemindent}{\parindent}%
-\setlength{\parsep}{\parskip}%
-}%
-\item[]}{\end{list}}
+%Define block quotes
+\usepackage[svgnames]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{libertine} % or any other font package (or none)
+\newcommand*\quotefont{\fontfamily{fxl}} % selects Libertine for quote font
+\usepackage{tikz}
+\usepackage{framed}
+% Make commands for the quotes
+\newcommand*{\openquote}{\tikz[remember picture,overlay,xshift=-15pt,yshift=-10pt]
+     \node (OQ) {\quotefont\fontsize{60}{60}\selectfont``};\kern0pt}
+\newcommand*{\closequote}{\tikz[remember picture,overlay,xshift=15pt,yshift=10pt]
+     \node (CQ) {\quotefont\fontsize{60}{60}\selectfont''};}
+% select a colour for the shading
+\definecolor{shadecolor}{named}{Azure}
+% wrap everything in its own environment
+\newenvironment{shadequote}%
+{\begin{snugshade}\begin{quote}\openquote}
+{\hfill\closequote\end{quote}\end{snugshade}}
 
 \title{GPU Accelerating the Ypnos Programming Language}
 \author{Samuel Pattuzzi}
-\date{March 201}
+\date{March 2013}
 
 \begin{document}
 \maketitle
 
 {
 \hypersetup{linkcolor=black}
-\setcounter{tocdepth}{5}
+\setcounter{tocdepth}{2}
 \tableofcontents
 }
+
 \chapter{Introduction}
 
-\section{Ypnos}
+In this project I created a compiler for the Ypnos programming language that
+targets modern GPUs allowing for massive speed-ups of programs in this
+language. The language allows programmers to use a very concise syntax to
+describe certain types of parallel grid operations. Using this syntax they are
+now able to target machines both with and without compatible GPUs.
+
+\section{Motivation}
+TODO: talk about the need for parallelisation on GPUs
+
+\section{Related work}
+
+\subsection{Ypnos}
 
 \emph{Stencil computations} are an idiom used in parallel programming.
 They work by defining a \emph{kernel} (or \emph{stencil}) which is
@@ -92,7 +89,7 @@ particularly good fit for stencil computations as its purity allows the
 programmer to write parallel programs without worrying about the
 interaction and sharing of state.
 
-\subsection{Syntax}
+\subsubsection{Syntax}
 
 The Ypnos language provides a custom syntax for defining stencil
 functions as well as a collection of primative operations for their
@@ -128,7 +125,7 @@ The final section of the syntax comes after \texttt{-\textgreater{}} and
 is the computation. This can be most Haskell syntax though recursion and
 function definition is not possible.
 
-\subsection{Primitives}
+\subsubsection{Primitives}
 
 As well as the syntax for stencil functions, Ypnos provides a library of
 primative operations. The primatives allow the programmer to combine the
@@ -200,15 +197,7 @@ place of our associative operator in the reduce primitive. Clearly,
 reduce can be implemented in terms of reduceR and so the later is the
 more general.
 
-\chapter{Preparation}
-
-TODO: Summarise section
-
-TODO: Make more discursive, story like.
-
-TODO: Why am I doing all this?
-
-\section{Accelerate}
+\subsection{Accelerate}
 
 Modern GPUs provide vast amounts of SIMD parallelism via general purpose
 interfaces (GPGPU). For most users these are hard to use as the
@@ -237,7 +226,7 @@ powerful enough to represent the later. As such, this project will
 concern itself not with the generation of CUDA code directly but through
 the Accelerate language.
 
-\subsection{GPU computation}
+\subsubsection{GPU computation}
 
 Haskell execution happens on the CPU and in main memory whereas GPU
 execution happens in parallel in a separate memory. In order for a
@@ -266,7 +255,7 @@ use :: Array sh e -> Acc (Array sh e)
 run :: Acc (Array sh e) -> Array sh e
 \end{verbatim}
 
-\subsection{A stratified language}
+\subsubsection{A stratified language}
 
 While the main type of operation in Accelerate is over arrays. However,
 we often want to compose arrays out of multiple scalar values or
@@ -300,7 +289,7 @@ operations, Accelerate provides an instance of the type class
 1 + 2 + 3 :: Exp Integer
 \end{verbatim}
 
-\subsection{Stencil support}
+\subsubsection{Stencil support}
 
 I have already mentioned that function over scalars can be applied over
 a whole grid, the map function being an example of this. Accelerate
@@ -333,7 +322,33 @@ within the array.
 With these two parameters we have defined an operation performs the
 stencil convolution.
 
-\section{Learning the libraries}
+\section{Summary}
+TODO
+
+\chapter{Preparation}
+
+TODO: Summarise section
+
+TODO: Make more discursive, story like.
+
+TODO: Why am I doing all this?
+
+\section{Requirements Analysis}
+TODO
+
+\section{Implementation Approach}
+TODO: Things like type classes, families etc
+
+\section{Choice of Tools}
+TODO
+
+\subsection{Programming Languages}
+
+\subsection{Development Tools}
+
+\subsection{Libraries}
+
+\subsubsection{Learning}
 
 In order to get familiar with the syntax of these two libraries I
 decided to implement some sample functions in both, the main one being
@@ -370,7 +385,11 @@ would be using in this project, namely:
 
 TODO: Requirements analysis plus other software engineering techniques
 
-\section{Test driven development}
+\section{Software Engineering Techniques}
+TODO
+
+\subsection{Iterative Development}
+\subsection{Test Driven Development}
 
 The correctness of my implementation was a central goal from the
 beginning of the project. In order to achieve this I took a test driven
@@ -393,9 +412,11 @@ Haskell data types. For user defined types, the programmer must provide
 an instance of the class \texttt{Arbitrary} which allows QuickCheck to
 generate random samples for testing.
 
+\section{Summary}
+
 \chapter{Implementation}
 
-\section{Compilation of the stencils}
+\section{Stencil Compilation}
 
 Compilation of stencils was a central task in this project. The abstract
 Ypnos syntax allows much flexibility in the underlying implementation.
@@ -459,8 +480,7 @@ and maintain the semblance of the types. I explored each of these
 approaches in the course of the project and I would like to now describe
 the benefits and drawbacks of both.
 
-\hyperdef{}{type-sys}{\subsection{A type system
-approach}\label{type-sys}}
+\subsection{Type System Approach}
 
 As we saw in the previous section: the types of the Ypnos CPU stencil
 and the Accelerate library's stencil differ wildly. Let's a closer look
@@ -537,7 +557,7 @@ This means that after centring we get the following:
   | _ | _ | c | _ | _ |
 \end{verbatim}
 
-\subsection{Implementing centring}
+\subsection{Centring}
 
 In order to implement the centring I had to consider both the one and
 two dimensional cases. It would be quite easy to deal with this deal
@@ -565,7 +585,7 @@ case and a tuple of tuples in the 2D case. This representation contains
 no information about which variables are cursors as we discussed in the
 previous section.
 
-\subsubsection{Intermediate approaches}
+\subsubsection{Intermediate Approaches}
 
 The first approach taken involved converting first from grid patterns
 into lists, balancing these lists then converting them into the centred
@@ -583,7 +603,7 @@ columns would already exist. However, this was not the case and I would
 have had to write these myself. This made the point of the intermediary
 stage of arrays altogether pointless.
 
-\subsubsection{Direct approach}
+\subsubsection{Direct Approach}
 
 The third and final approach was to operate directly on the lists
 extracted from the \texttt{GridPattern} types. As I already mentioned:
@@ -610,7 +630,7 @@ we get \texttt{{[}{[}a{]}{]}}. This approach allows the algorithms for
 centring to be described at a general level without being concerned
 about the number of dimensions actually involved.
 
-\hyperdef{}{run-time}{\subsection{A run-time approach}\label{run-time}}
+\subsection{Run-time Approach}
 
 The second approach to the translation of stencils was to keep the types
 the same (or similar, as we will see) to Ypnos' original implementation.
@@ -670,7 +690,7 @@ While this run-time conversion creates an overhead it also, as we have
 seen, simplifies the types significantly. However TODO: mention
 deforestation.
 
-\section{Implementation of the primitives}
+\section{Primitives}
 
 TODO: rewrite
 
@@ -873,7 +893,7 @@ TODO: run implementation
 
 TODO: reduce implementation
 
-\section{How would it be used}
+\section{Usage}
 
 TODO: Example of usage and replacement
 
@@ -889,7 +909,7 @@ co-processor and as a result incurs an overhead for copying results to
 and from its local memory. In evaluating the speed up of using the GPU I
 have to account for this.
 
-\section{Speed-up}
+\section{Performance}
 
 Before embarking on the evaluation I postulated that the GPU should
 provide a speed up over the CPU due to its capacity for parallel
@@ -981,7 +1001,7 @@ TODO: Reduce
 
 TODO: Model of on/off
 
-\section{Unit testing}
+\section{Correctness}
 
 A central goal of the project was to produce a correct translation from
 Ypnos to Accelerate. Already, by choosing a type safe language such as
@@ -1081,7 +1101,7 @@ functionality of certain parts of code. This meant that when I
 encountered bugs I was able to pin-point their origin often without the
 use of a debugger.
 
-\section{Useability to the programmer}
+\section{Usability}
 
 While not mentioned in my original proposal, the useability to the
 programmer is another non-functional requirement. I decided that
@@ -1147,16 +1167,16 @@ physical systems and graphics programmers developing graphics
 algorithms. I have included two user stories for our two representative
 users:
 
-\begin{quote}
+\begin{shadequote}
 Kiaran is a physical scientist who is writing a simulation of a fluid
 dynamics system. He has a little Haskell experience already but has
 mostly used other languages such as Matlab and Fortran. He chose
 Ypnos/Haskell because he knew it would allow him to easily switch
 between a CPU implementation on his machine and a GPU implementation on
 the simulation machine he is using.
-\end{quote}
+\end{shadequote}
 
-\begin{quote}
+\begin{shadequote}
 Noemi is a writing a graphics transformation for a photo editing
 package. The photos her user edit are typically very large but she still
 would like to provide real-time performance with her algorithms. Noemi
@@ -1166,7 +1186,7 @@ well on machines that don't have a compatible GPU. She already has very
 good experience in Haskell and is familiar with more complex features
 and extensions such as type and data families. She has picked
 Ypnos/Haskell because of it's syntax and the ease of degrading.
-\end{quote}
+\end{shadequote}
 
 We can see that there are many tasks that these users would want to
 perform with our system: coding up a filter into a stencil (Noemi),
@@ -1207,20 +1227,20 @@ sake of comparison I will also include the approach of the programmer
 re-coding their implementation in Accelerate for the GPU.
 
 \newpage
-\begin{changemargin}{1cm}{1cm}
-
+\newcommand{\sideways}[1]{
+  \parbox[t]{2mm}{{\rotatebox[origin=r]{90}{#1}}}}
 \newlength{\fstcollen}
 \newlength{\sndcollen}
-\setlength{\fstcollen}{2cm}
-\setlength{\sndcollen}{(\linewidth-\fstcollen)/4}
-\begin{longtable}[c]{p{\fstcollen} p{\sndcollen} p{\sndcollen} p{\sndcollen} p{\sndcollen}}
+\setlength{\fstcollen}{0.5cm}
+\setlength{\sndcollen}{(\textwidth-\fstcollen-2cm)/4}
+\begin{longtable}{r | p{\sndcollen} p{\sndcollen} p{\sndcollen} p{\sndcollen}}
 \hline\noalign{\medskip}
 
-Cognitive dimensions
+\sideways{Cognitive dimensions}
  &
 Accelerate
  &
-Import approach
+Non-unifing
  &
 Data families
  &
@@ -1229,7 +1249,7 @@ Type families (only stencil data type)
 \\\noalign{\medskip}
 \hline\noalign{\medskip}
 
-Repetition viscosity
+\sideways{Repetition viscosity}
  &
 \textbf{Worst}
 
@@ -1252,7 +1272,7 @@ implementation.
 
 \\\noalign{\medskip}
 
-Imposed lookahead
+\sideways{Imposed lookahead}
  &
 \textbf{Worst}
 
@@ -1278,7 +1298,7 @@ should be considered too.
 
 \\\noalign{\medskip}
 
-Consistency
+\sideways{Consistency}
  &
 \textbf{Worst}
 
@@ -1299,7 +1319,7 @@ the approach is almost entirely consistent except for the types.
 
 \\\noalign{\medskip}
 
-Terseness
+\sideways{Terseness}
  &
 \textbf{Worst}
 
@@ -1318,7 +1338,7 @@ The syntax for switching is minimally terse.
 
 \\\noalign{\medskip}
 
-Hidden dependencies
+\sideways{Hidden dependencies}
  &
 \textbf{Best}
 
@@ -1343,7 +1363,7 @@ affect some programs.
 
 \\\noalign{\medskip}
 
-Abstraction gradient
+\sideways{Abstraction gradient}
  &
 \textbf{Best}
 
@@ -1364,7 +1384,7 @@ advanced type features.
 
 \\\noalign{\medskip}
 
-Closeness of mapping
+\sideways{Closeness of mapping}
  &
 \textbf{Best}
 
@@ -1390,9 +1410,7 @@ The comonadicity is lost.
 \caption{Comparison of the different API's using cognitive dimensions.}
 \end{longtable}
 
-\end{changemargin}
-
-\subsection{Conclusion}
+\subsection{Conclusions}
 
 As we now can see, the best approach for our users is that of associated
 type families with the data constructor for the stencil function. This
@@ -1420,6 +1438,14 @@ family approach. This could require using a lower level implementation
 rather than using Accelerate. For this reason getting a closer mapping
 was beyond the scope of this project.
 
+\section{Summary}
+
 \chapter{Conclusion}
+
+\section{Accomplishments}
+
+\section{Lessons Learnt}
+
+\section{Future Work}
 
 \end{document}

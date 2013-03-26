@@ -104,3 +104,33 @@ Tue 26 Mar 17:17:39 GMT 2013, 8710 diss.md
 Tue 26 Mar 17:27:39 GMT 2013, 8710 diss.md
 Tue 26 Mar 17:37:39 GMT 2013, 8710 diss.md
 Tue 26 Mar 17:47:39 GMT 2013, 8710 diss.md
+Tue 26 Mar 17:57:39 GMT 2013, 8710 diss.md
+Tue 26 Mar 18:07:39 GMT 2013, 8710 diss.md
+Tue 26 Mar 18:12:43 GMT 2013, texcount -brief diss.latex 7465+94+83 (41/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 18:22:43 GMT 2013, texcount -brief diss.latex 7465+94+83 (41/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 18:32:44 GMT 2013, texcount -brief diss.latex 7465+94+83 (41/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 18:42:48 GMT 2013, texcount -brief diss.latex 7465+94+83 (41/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 18:52:50 GMT 2013, texcount -brief diss.latex 7474+97+83 (43/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:02:51 GMT 2013, texcount -brief diss.latex 7474+89+83 (44/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:12:52 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:22:52 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:32:53 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:42:53 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 19:52:54 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:02:54 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:12:55 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:22:55 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:32:56 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:42:56 GMT 2013, texcount -brief diss.latex 7484+103+83 (52/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 20:52:57 GMT 2013, texcount -brief diss.latex 7484+107+83 (56/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:02:57 GMT 2013, texcount -brief diss.latex 7484+108+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:12:58 GMT 2013, texcount -brief diss.latex 7482+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:22:58 GMT 2013, texcount -brief diss.latex 7498+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:32:59 GMT 2013, texcount -brief diss.latex 7498+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:42:59 GMT 2013, texcount -brief diss.latex [1;31m!!! Reached end of file while waiting for }. !!![0m 0+0+0 (0/0/0/0) File: diss.latex (errors:1) make: Nothing to be done for `diss.md'.
+Tue 26 Mar 21:53:00 GMT 2013, texcount -brief diss.latex 7540+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 22:03:00 GMT 2013, texcount -brief diss.latex 7539+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 22:13:01 GMT 2013, texcount -brief diss.latex 7540+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 22:23:01 GMT 2013, texcount -brief diss.latex 7540+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 22:33:02 GMT 2013, texcount -brief diss.latex 7539+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.
+Tue 26 Mar 22:43:02 GMT 2013, texcount -brief diss.latex 7539+104+83 (57/0/2/2) File: diss.latex make: Nothing to be done for `diss.md'.

@@ -742,6 +742,8 @@ parallelism of the GPU. More specifically, I expected that: as grid sizes
 increased the run time of the computation would increase less quickly in the GPU
 case compared with the CPU case.
 
+### Methodology
+
 To measure the run-time I made use of a library called *Criterion* which
 provides functions for:
 
@@ -758,6 +760,15 @@ size of 100 and a resample size of 100,000. The result from Criterion is a mean
 with a confidence interval of 95%. I will use these results to compare the
 performance of the various functions implemented.
 
+The machine being used for benchmarking was provided by the labs and remotely
+hosted. The machines specifications are as follows:
+
+* Ubuntu Linux 12.04 32-bit edition
+* Quad core Intel Core i5-2400S CPU clocked at 2.50GHz with a 6M cache
+* 16GB of core memory
+* Nvidia GeForce 9600 GT graphics card featuring the G94 GPU with a 256M
+  framebuffer.
+
 ### Overhead
 
 In order to show this I must first discount the effect of copying to and from
@@ -773,7 +784,7 @@ The benchmark suite must test both the speed-up of both primitives: `run` and
 functions for each to test speed across a representative set of
 calculations. These functions include:
 
-* **The average stencil** [ref] that we have seen in the previous. This
+* **The average stencil** [ref] that we have seen in the previous sections. This
   function is representative of convolution style operations which we may wish
   to perform on the data. It operates over floating point numbers which is a
   common use case for scientific computing
@@ -793,8 +804,275 @@ TODO: Model of on/off
 
 ## Unit testing
 
-### Useability to the programmer
+A central goal of the project was to produce a correct translation from Ypnos to
+Accelerate. Already, by choosing a type safe language such as Haskell I vastly
+reduced the number of run-time errors possible due to programming errors. To
+catch the rest I made use of *unit testing* and *Test Driven
+Development*. Clearly, unit testing can only provide an assurance of correctness
+and not a guarantee. However, I decided that a formal proof (which could give
+these guarantees) was beyond the scope of this project. In writing these test I
+have assumed that the original CPU implementation was correct and could be
+compared against as a gold standard.
 
-TODO: User having to write types
+The testing framework used works slightly differently to other unit testing
+frameworks. In a standard framework the user provides test cases which
+incorporates both the test data (some times generated) and assertions. In
+Haskell's *QuickCheck* we only provide axioms about our functions and let the
+framework provide the data based on the type.
+
+Typically QuickCheck will generate hundreds of test samples to verify a
+particular axiom. This provides a better assurance than ordinary unit testing as
+via the random process, QuickCheck often comes up with corner cases the
+programmer may not have devised themselves.
+
+The following sections of my project where particularly necessary to check by
+QuickCheck:
+
+* The centring algorithm for grid patterns, as this contains a large part of the
+  translations complexity.
+* The `run` primitive.
+* The `reduce` primitive.
+
+The approach taken to testing the grid patterns was ensure that the
+transformation:
+
+* Starts with a grid that has certain properties (a precondition): regular size,
+  positive size, has a cursor.
+* Maintains the regularity of size: the length of each row was is same.
+* Centres the cursor given the original grid had a cursor.
+* Both roffset and coffset are always positive on such a
+  grid. [TODO: section reference]
+
+The assumption was that grid patterns given to the transformation procedures
+would be correct to begin with. As such, to improve the amount of test data
+generated, I enforced these properties at the generation level. This is safe as
+the grid patterns are generated through the CPU translation which I am assuming
+to be correct.
+
+To test the primitives I used a standard testing approach of comparing against a
+existing correct implementation. Both implementations are fed the same data and
+their results should come out the same. For the `reduce` primitive I compare
+against Haskell's built in reduce function as I can safely assume this to be
+correct. For the `run` primitive I originally indented to test against the Ypnos
+CPU implementation as I was assuming this to be correct. However, in running my
+tests I uncovered a bug in the implementation of boundaries[^bounds] which made
+me consider other options.
+
+Given that I couldn't trust the results of the CPU implementation I tested the
+GPU primitive against a hand coded stencil in Accelerate. This was not ideal as
+it used essentially the same code an the run implementation but this still
+provided some assurance. Once the bug had been fixed in the CPU implementation I
+was then able to test against this as well.
+
+The run primitive is tested by running the average function on a randomly
+generated grid. The grid is passed to the GPU, CPU and Accelerate
+implementations of `avg` the resulting grid is then compared between the two and
+any difference counts as a failure.
+
+The same procedure is used for the reduce primitive. We use a one-dimensional
+grid for this case as the built in Haskell function we are comparing against is
+one-dimensional. The resulting reduced values are compared and an failure is
+registered if they should differ.
+
+```
+write  --->  compile   --->   test   --->   commit
+code             |              |              |
+  ^--------------+--------------+--------------+
+```
+
+For the large part of the project I have been coding tests and implementation in
+parallel (also known as Test Driven Development or TDD). This allowed me to
+catch errors early on and fix them immediately. TDD allowed for much faster
+debugging as it provides confidence in the functionality of certain parts of
+code. This meant that when I encountered bugs I was able to pin-point their
+origin often without the use of a debugger.
+
+[^bounds]: [TODO: explain bug]
+
+
+## Useability to the programmer
+
+While not mentioned in my original proposal, the useability to the programmer is
+another non-functional requirement. I decided that performing a full usability
+study would be unnecessary as this was a secondary requirement. Instead I have
+chosen to evaluate the usability using the method of *Cognitive
+Dimensions*[TODO:ref] to compare the various approaches already discussed.
+
+Cognitive Dmensions of notations (CD) provide a light weight vocabulary for
+discussing various factors of programming language design. As Ypnos is
+essentially a programming language (albeit, one embedded in Haskell) it makes
+sense to use this technique. It works by specifying a number of properties of a
+notation (*dimensions*, for a complete list of dimensions considered see
+appendix TODO) which must, in general, be traded off against one another. For
+this reason it is important to understand the representative tasks and the user
+that will be performing them. Then design decisions in the language can be
+compared and evaluated using the dimensions relative to the tasks.
+
+### System = Language + Environment
+
+It is important to note that CD relates to a whole system not just the
+language. We define the system to be the combination of programming language and
+the programming environments. For example, programming over the phone verses
+programming in a visual editor. For the purposes of discussing only the language
+changes that I have introduced I will fix environment and assume that it has the
+following features:
+
+* Screen-based text editor (e.g. Vim, Emacs or TextMate)
+* Search and replace functionality (including regular expressions)
+* [TODO: Anything else?]
+
+### Methodology
+
+I used the following procedure in evaluating the changes to Ypnos using CDs:
+
+* Identify the relevant users of my system and sketch out a basic user profile.
+* Select the relevant task of these users on my part of the language.
+* Highlight which cognitive dimensions are most important to tasks selected.
+* Show a comparison of the various approaches to this implementation.
+* Conclude which approach was taken and why.
+
+### User profiles
+
+I have decided that given the applications to scientific computing and graphics
+the two main users of Ypnos would be scientists simulating physical systems and
+graphics programmers developing graphics algorithms. I have included two user
+stories for our two representative users:
+
+> Kiaran is a physical scientist who is writing a simulation of a fluid dynamics
+> system. He has a little Haskell experience already but has mostly used other
+> languages such as Matlab and Fortran. He chose Ypnos/Haskell because he knew
+> it would allow him to easily switch between a CPU implementation on his
+> machine and a GPU implementation on the simulation machine he is using.
+
+> Noemi is a writing a graphics transformation for a photo editing package. The
+> photos her user edit are typically very large but she still would like to
+> provide real-time performance with her algorithms. Noemi has a GPU in her
+> computer so she will be writing for this to ensure that her performance is
+> good. However, she also wants her system to degrade well on machines that
+> don't have a compatible GPU. She already has very good experience in Haskell
+> and is familiar with more complex features and extensions such as type and
+> data families. She has picked Ypnos/Haskell because of it's syntax and the
+> ease of degrading.
+
+We can see that there are many tasks that these users would want to perform with
+our system: coding up a filter into a stencil (Noemi), writing a complex
+reduction to determine the state of the system (Kiaran), debugging to find out
+why they get the wrong values (both). However, I will be ignoring all task that
+involve parts of the system which I did not implement. This leaves us with one
+central task for the two use cases: converting between GPU and CPU.
+
+The cognitive dimensions relevant to this task are:
+
+* Low repetition viscosity: to allow the user to easily change the
+  implementation without changing too many points in code.
+* Little to no imposed look ahead: allowing the programmer to use one
+  implementation without having to think about later switching.
+* Consistency: the programs syntax or usage doesn't change from CPU to GPU.
+* Terseness: the syntax to specify the implementation doesn't get in the way of
+  coding the stencils.
+* Closeness of mapping: the model presented to the user through the API should
+  map well to the users mental model for these types of operation.
+
+The various approaches to provide an API to the programmer where discussed in
+the implementation section (TODO: link). They essentially boiled down to the
+following three approaches: choosing the different implementation based on
+importing, using type classes with associated data families, using type classes
+with associated type families. For the sake of comparison I will also include
+the approach of the programmer re-coding their implementation in Accelerate for
+the GPU.
+
+: Comparison of the different API's using cognitive dimensions.
+
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Cognitive dimensions|Accelerate                     |Import approach                | Data families                  |Type families (only stencil data|
+|                    |                               |                               |                                |type)                           |
++====================+===============================+===============================+================================+================================+
+|Repetition viscosity|**Worst**                      |We have improved the viscosity |Data families worsen the        |**Best**                        |
+|                    |                               |significantly. The sure must   |viscosity over the import method|                                |
+|                    |Clearly here we have a very    |only implement their stencils  |as we must now change all the   |Here we have the least          |
+|                    |high viscosity: each function  |in one language but they must  |data constructors as opposed to |repetition viscosity of all the |
+|                    |must be re written in terms of |still change all the imports   |the imports. In real code there |approaches. We now only need to |
+|                    |new syntax and run in different|and correct type errors.       |will be more of these than      |change the quasi quoter to      |
+|                    |ways.                          |                               |import locations.               |change the whole implementation.|
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Imposed lookahead   |**Worst**                      |**Best**                       |**Best**                        |**Best**                        |
+|                    |                               |                               |                                |                                |
+|                    |The user must know ahead of    |There is practially no imposed |We do not have imposed lookahead|There is little imposed look    |
+|                    |time that they will be writing |lookahead as we can simple swap|as we can easily swap the       |ahead in theory though some     |
+|                    |in two languages to be sure to |out the implementation by      |constructors.                   |operations are currently not    |
+|                    |minimize duplication of code   |importing form different       |                                |supported in the GPU            |
+|                    |and structure their program    |places.                        |                                |implementation. (TODO: link to  |
+|                    |correctly.                     |                               |                                |more) Some types may not be     |
+|                    |                               |                               |                                |supported easily in both        |
+|                    |                               |                               |                                |implementations so this should  |
+|                    |                               |                               |                                |be considered too.              |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Consistency         |**Worst**                      |Consistency is improved as the |The syntax and usage is the same|**Best**                        |
+|                    |                               |syntax is now uniform but types|except for changing the         |                                |
+|                    |The syntax's are different and |are not uniform.               |constructors which is           |We have eliminated the          |
+|                    |so fairly inconsistent. There  |                               |inconsistent.                   |inconsistency in usage of the   |
+|                    |are, however, some similarities|                               |                                |data families. Now the approach |
+|                    |between the two in their       |                               |                                |is almost entirely consistent   |
+|                    |stencil representation.        |                               |                                |except for the types.           |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Terseness           |**Worst**                      |Changing requires a fair bit of|We require a lot of code to     |**Best**                        |
+|                    |                               |code to be changed as we may be|express the swap from CPU to    |                                |
+|                    |A lot of code is written by the|importing many different things|GPU.                            |The syntax for switching is     |
+|                    |user to cope with the two      |from the Ypnos libraries and   |                                |minimally terse.                |
+|                    |different implementations.     |all these things must be       |                                |                                |
+|                    |                               |changed.                       |                                |                                |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Hidden dependencies |**Best**                       |**Worst**                      |**Best**                        |**Worst**                       |
+|                    |                               |                               |                                |                                |
+|                    |No hidden dependencies. It is  |Many hidden dependencies are   |Here the dependencies introduced|More hidden dependencies are    |
+|                    |very clear and explicit what is|introduced as the types of the |in the type system by the import|introduced. Types change        |
+|                    |going on.                      |different imported functions   |approach have been made explicit|underneath the users noses due  |
+|                    |                               |don't necessarily match. This  |by data constructors.           |to different type and constraint|
+|                    |                               |can cause failures in many     |                                |families. This might affect some|
+|                    |                               |different places on changing   |                                |programs.                       |
+|                    |                               |the import.                    |                                |                                |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Abstraction gradient|**Best**                       |The abstraction level is fairly|The user must now be familiar   |**Worst**                       |
+|                    |                               |low as it uses only simple     |with the idea of an associated  |                                |
+|                    |The abstraction is at it's     |Haskell constructs.            |data family and GADT which are  |The abstraction here is perhaps |
+|                    |basic level: that of using     |                               |quite advanced Haskell type     |highest of all as it uses the   |
+|                    |Ypnos or Accelerate. The user  |                               |features.                       |most advanced type features.    |
+|                    |must get to grips with these   |                               |                                |                                |
+|                    |abstractions as a minimum.     |                               |                                |                                |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+|Closeness of mapping|**Best**                       |**Worst**                      |**Worst**                       |**Worst**                       |
+|                    |                               |                               |                                |                                |
+|                    |This way we preserve the       |The comonadicity is lost due to|The comonadicity is lost also.  |The comonadicity is lost.       |
+|                    |comonadic nature of the        |having to change the types to  |                                |                                |
+|                    |operations in the type so that |suit the accelerate            |                                |                                |
+|                    |it is obvious to the user what |implementation.                |                                |                                |
+|                    |is going on.                   |                               |                                |                                |
++--------------------+-------------------------------+-------------------------------+--------------------------------+--------------------------------+
+
+
+### Conclusion
+
+As we now can see, the best approach for our users is that of associated type
+families with the data constructor for the stencil function. This approach is
+best in the viscosity, imposed lookahead, consistency and terseness
+dimensions. However, for this it has compromised in hidden dependencies,
+abstraction and closeness of mapping.
+
+The *hidden dependency* problems are mitigated by the Haskell compiler which warns
+and throws errors when there is a conflict in these dependencies. While a little
+increase in hidden dependencies is necessary to reduce viscosity, there could be
+room for improvement here by making the types more consistent. This would help
+us remove the dependencies due to the changing types and constraints.
+
+Given that our example users are fairly advanced the increase in *abstraction*
+should not be a problem however we should be aware of this extra difficulty to
+learning the language. We imagine that Kiaran wouldn't have a problem learning
+about type families but it is still a learning curve.
+
+The *closeness of mapping* is an issue that is not inherent in the implementation
+but rather an artifact of it. With more time on this project I would try to
+re-introduce the comonadic types to the type family approach. This could require
+using a lower level implementation rather than using Accelerate. For this reason
+getting a closer mapping was beyond the scope of this project.
 
 # Conclusion

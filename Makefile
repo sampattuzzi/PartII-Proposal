@@ -4,9 +4,11 @@
 # Note that continuation lines require '\'
 # and that TAB is used after ':' and before unix commands.
 
-DISS = diss.md Makefile
+DISS = diss.latex
 
 pandoc = /home/sam/.cabal/bin/pandoc
+
+pandoc_opts = --chapters --template=template.latex
 
 PROP = proposal.tex propbody.tex refs.bib
 
@@ -28,13 +30,19 @@ proposal.pdf:	$(PROP)
 	pdflatex proposal
 
 diss.pdf:	$(DISS)
-	$(pandoc) diss.md -o diss.pdf -V geometry:"margin=1in"
+	pdflatex diss.latex
+#	bibtex diss.latex
+	pdflatex diss.latex
+	pdflatex diss.latex
 
 diss:		diss.pdf
 	evince diss.pdf &
 
-makefile.txt:	Makefile
-	expand Makefile >makefile.txt
+wc:	diss.latex
+	texcount -brief diss.latex
+
+#diss.latex:	$(DISS)
+#	$(pandoc) diss.md -o diss.latex $(pandoc_opts)
 
 clean:
 	rm -f diss.ps *.dvi *.aux *.log *.err

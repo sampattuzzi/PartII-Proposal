@@ -9,7 +9,7 @@ freq=600 #10 minutes
 #freq = 3600 #An hour
 
 function count {
-	cnt=$(wc -w $src)
+	cnt=$(make wc $src)
 	time=$(date)
 	echo $time, $cnt >> $log
 }

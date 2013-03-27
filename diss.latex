@@ -2,6 +2,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{calc}
+\usepackage{listings}
 \usepackage{amssymb,amsmath}
 \usepackage[unicode=true]{hyperref}
 \usepackage{longtable}
@@ -89,6 +90,37 @@ particularly good fit for stencil computations as its purity allows the
 programmer to write parallel programs without worrying about the
 interaction and sharing of state.
 
+\subsection{Accelerate}
+
+Modern GPUs provide vast amounts of SIMD parallelism via general purpose
+interfaces (GPGPU). For most users these are hard to use as the
+interfaces are very low level and require the user to put a lot of
+effort into writing correct parallel programs.
+
+Matrices are a mathematical model which embodies SIMD parallelism. They are
+operators over large amounts of data. It is possible to express many parallel
+calculations and operations as matrix equations. The library contains operations
+such as \texttt{map}, \texttt{zip} and \texttt{fold} implemented efficiently as
+well its own stencil convolution function.
+
+\emph{Accelerate} is an EDSL for the Haskell language which implements
+parallel array computations on the GPU. The primary target GPUs are
+those which support NVIDIA's CUDA extension for GPGPU programming.
+Accelerate uses algorithm skeletons for online CUDA code generation.
+
+\section{Summary}
+TODO
+
+\chapter{Preparation}
+
+TODO: Summarise section
+
+TODO: Make more discursive, story like.
+
+TODO: Why am I doing all this?
+
+\section{Ypnos}
+TODO: talk a little more about having to prepare.
 \subsubsection{Syntax}
 
 The Ypnos language provides a custom syntax for defining stencil
@@ -97,9 +129,11 @@ manipulation and use.
 
 The syntax for a simple averaging stencil would look as follows:
 
-\begin{verbatim}
-avg2D = [fun| X*Y:|_ a _| |b @c d| |_ e _| -> (a + b + c + d + e )/5|]
-\end{verbatim}
+\begin{lstlisting}[language=Haskell]
+avg2D = [fun| X*Y:|_  a _|
+                  |b @c d|
+                  |_  e _| -> (a + b + c + d + e )/5|]
+\end{lstlisting}
 
 Ypnos uses the \emph{quasiquoting mechanism} in Haskell to provide its
 syntax. It essentially allows the programmer to provide a parser and
@@ -197,34 +231,21 @@ place of our associative operator in the reduce primitive. Clearly,
 reduce can be implemented in terms of reduceR and so the later is the
 more general.
 
-\subsection{Accelerate}
 
-Modern GPUs provide vast amounts of SIMD parallelism via general purpose
-interfaces (GPGPU). For most users these are hard to use as the
-interfaces are very low level and require the user to put a lot of
-effort into writing correct parallel programs.
+\section{Accelerate}
 
-Matrices are a mathematical model which embodies SIMD parallelism. They
-are operators over large amounts of data. It is possible to express many
-parallel calculations and operations as matrix equations.
-
-\emph{Accelerate} is an EDSL for the Haskell language which implements
-parallel array computations on the GPU. The primary target GPUs are
-those which support NVIDIA's CUDA extension for GPGPU programming.
-Accelerate uses algorithm skeletons for online CUDA code generation.
+We have already mentioned Accelerate as one of the implementors of stencil
+convolution. In fact, Accelerate is an excellent target for intermediary code
+compilation. While the stencil semantics of Accelerate and Ypnos differ in some
+respects, the former is powerful enough to represent the later. As such, this
+project will concern itself not with the generation of CUDA code directly but
+through the Accelerate language.
 
 Accelerate uses the Haskell type system to differentiate between arrays
 on the CPU and GPU. It does this by way of a type encapsulating GPU
 operations. There is a further \emph{stratification} of this type into
 scalar and array values with scalar computations being composed into
 array computations.
-
-Accelerate contains built in support for stencil computations and so is
-an excellent intermediary target for this project. While the stencil
-semantics of Accelerate and Ypnos differ in some respects, the former is
-powerful enough to represent the later. As such, this project will
-concern itself not with the generation of CUDA code directly but through
-the Accelerate language.
 
 \subsubsection{GPU computation}
 
@@ -322,45 +343,91 @@ within the array.
 With these two parameters we have defined an operation performs the
 stencil convolution.
 
-\section{Summary}
-TODO
-
-\chapter{Preparation}
-
-TODO: Summarise section
-
-TODO: Make more discursive, story like.
-
-TODO: Why am I doing all this?
 
 \section{Requirements Analysis}
-TODO
+
+Requirements analysis undertaken in the early stages of this project allowed
+me to proceed smoothly and identify points of failure early. Each major goal of
+the project was categorized according to priority, difficulty and risk. The
+priority signifies the importance to the completion of the project: essential
+requirements have been marked as high and optional extensions as low. Other
+important factors not mentioned in the proposal have also been included and
+marked as medium priority. The difficulty gave an estimate of how hard certain
+requirements would be to achieve and so help provide a rough estimate of how
+much time and resource should be dedicated to each. The risk embodies how much
+uncertainty was present about the implementation details at the start of the
+project. A high risk requirement is one that could easily take more time than
+initially forseen.
+
+The goals were further devided into functional and non-functional requirement,
+i.e, things that the system must do and things that it must be. Functional
+requirements specify that which I must implement and build during the course of
+the project. Non-function requirements specify how the system should perform and
+as such how it should be tested.
+
+\begin{table}
+\caption{Categorization of the main project requirements.}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\multicolumn{2}{|l|}{Requirements}                       & Priority & Difficulty & Risk    & Functional / Non-Functional \\
+\hline
+\multicolumn{2}{|l|}{Correct translation}                & High     & Medium     & High    & Non-functional              \\
+\hline
+\multicolumn{2}{|l|}{Stencil compilation}                & High     & Hard       & Medium  & Functional                  \\
+\hline
+Primitives                                    & Run      & High     & Medium     & Medium  & Functional                  \\
+\cline{3-6}
+                                              & Reduce   & High     & Medium     & Medium  & Functional                  \\
+\cline{3-6}
+                                              & Iterate  & Low      & Easy       & Low     & Functional                  \\
+\cline{3-6}
+                                              & Zip      & Low      & Hard       & Low     & Functional                  \\
+\hline
+\multicolumn{2}{|l|}{Better scaling than CPU}            & High     & Medium     & High    & Non-functional              \\
+\hline
+\multicolumn{2}{|l|}{Usable API}                         & Medium   & Medium     & Medium  & Non-functional              \\
+\hline
+\end{tabular}
+\end{table}
+
+High risk and high priority requirements had to have special attention paid to
+them in order to prevent the project from slipping. In scheduling the tasks I
+took a risk driven approach by trying to implement the highest risk functional
+requirements first and test the highest risk non-functional requirements
+early. For example, to ensure compilation correctness I took a test driven
+approach to development. I will talk about this in more detail in the
+section~\ref{sec:tdd}.
+
+\subsection{Task Dependencies}
+
+TODO: worth talking about?
 
 \section{Implementation Approach}
 TODO: Things like type classes, families etc
 
 \section{Choice of Tools}
-TODO
 
 \subsection{Programming Languages}
-
 \subsection{Development Tools}
 
 \subsection{Libraries}
 
+\subsubsection{Accelerate}
+
+TODO: why did I choose it.
+
 \subsubsection{Learning}
 
-In order to get familiar with the syntax of these two libraries I
-decided to implement some sample functions in both, the main one being
-the average function we have already seen. With this I was able to
-familiarise myself with the embedded languages and prepare for the task
-of implementation.
+In order to get familiar with the syntax of these both Ypnos and Accelerate I
+decided to implement some sample functions in both, the main one being the
+average function we have already seen. With this I was able to familiarise
+myself with the embedded languages and prepare for the task of implementation.
 
-Furthermore, this allowed me to become familiar with the other tools I
-would be using in this project, namely:
+Furthermore, this allowed me to become familiar with the other tools I would be
+using in this project, namely:
 
+TODO: Move elsewhere
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
 \item
   Haskell, the programming language. Having not used this before I had
   to get familiar with the syntax as well as some of the more advanced
@@ -386,31 +453,85 @@ would be using in this project, namely:
 TODO: Requirements analysis plus other software engineering techniques
 
 \section{Software Engineering Techniques}
-TODO
+
+Third year projects are long-running software engineering projects and as such
+require the use of software engineering techniques to ensure that the final
+result arrives on time, doesn't fall short of it's requirements and doesn't give
+way to complexity. To achieve this all methods of software engineering start
+with a requirements analysis followed by a plan of action.
+
 
 \subsection{Iterative Development}
+
+In some projects tools are already well know and similar products have already
+been produced. This was not the case with my project as I was new to the tools
+and the way of thinking about problem solving in Haskell. So to ensure a final
+product that gave the best results I decided on using the \emph{interative}
+model to develop this project.
+
+Iterative development sets aside time to go back and revise part of the system
+with the new knowledge gathered from its implementation. In variably in
+implementation we discover new information which requires us to go back and
+rework the system. The most famous historical examples have been revisions to
+requirements and user interface but often also the technical architecture itself
+is affected by implementation information.
+
+TODO: Diagram
+
+An iteratively developed project starts with an inception phase in which initial
+requirements and goals are layed out. The project then proceeds through cycles
+which consist of the following stages:
+
+\begin{itemize}
+\item
+  Gather requirements
+\item
+  Design
+\item
+  Coding
+\item
+  Testing
+\item
+  Examine
+\end{itemize}
+
+The first and last stages in the cycle merge together as requirements for the
+next iteration feed of the examination of the last. After each cycle there is an
+optional deployment phase in which the product is put into the users
+environment. This phase was not used in this project.
+
+Iterative development may be run \emph{ad infinitum} or it allowed to finish
+once certain criteria have been met or resources depleted. For me the limiting
+resource was the time allocated for this project and the finishing criteria were
+the goals laid out in the initial proposal, namely the success criterion.
+
+In this project various approaches where produced and redesigned informed from
+the failings of the last. A risk driven approach was taken where the most
+difficult parts of the system were attempted first in order to reduce the amount
+of uncertainty in the project as it progressed.
+
 \subsection{Test Driven Development}
+\label{sec:tdd}
 
-The correctness of my implementation was a central goal from the
-beginning of the project. In order to achieve this I took a test driven
-approach to development. This meant that while writing the
-implementation I was simultaneously writing unit tests for that code.
-The approach allowed me to quickly and effectively find bugs which had
-not already been found by the Haskell type system.
+The correctness of my implementation was a central goal from the beginning of
+the project. In order to achieve this I took a test driven approach to
+development. This meant that while writing the implementation I was
+simultaneously writing unit tests for that code.  The approach allowed me to
+quickly and effectively find bugs which had not already been found by the
+Haskell type system.
 
-\emph{QuickCheck} is Haskell's defacto standard unit testing library. In
-most unit testing libraries for other platforms, the programmer has to
-provide sets of test data for the library to check against the program.
-The code for generating this data is left to the programmer. QuickCheck
-takes a different approach. Instead of specifying testing functions
-which include the test generation, we specify properties which take the
-data to be tested as an argument. We then leave the generation of this
-data up to the library.
+\emph{QuickCheck} is Haskell's defacto standard unit testing library. In most
+unit testing libraries for other platforms, the programmer has to provide sets
+of test data for the library to check against the program.  The code for
+generating this data is left to the programmer. QuickCheck takes a different
+approach. Instead of specifying testing functions which include the test
+generation, we specify properties which take the data to be tested as an
+argument. We then leave the generation of this data up to the library.
 
-QuickCheck is able to generate random testing data for most built in
-Haskell data types. For user defined types, the programmer must provide
-an instance of the class \texttt{Arbitrary} which allows QuickCheck to
-generate random samples for testing.
+QuickCheck is able to generate random testing data for most built in Haskell
+data types. For user defined types, the programmer must provide an instance of
+the class \texttt{Arbitrary} which allows QuickCheck to generate random samples
+for testing.
 
 \section{Summary}
 
@@ -418,13 +539,13 @@ generate random samples for testing.
 
 \section{Stencil Compilation}
 
-Compilation of stencils was a central task in this project. The abstract
-Ypnos syntax allows much flexibility in the underlying implementation.
-Ypnos achieves this via Haskell's Quasi Quoting mechanism for compiling
-custom syntax to Haskell AST. Accelerate's implementation has overridden
-much of the Haskell operators required for this translation stage so the
-bulk of the effort went into producing the functions that contained the
-computation. These functions take the following form:
+Compilation of stencils was a central task in this project. The abstract Ypnos
+syntax allows much flexibility in the underlying implementation.  Ypnos achieves
+this via Haskell's Quasi Quoting mechanism for compiling custom syntax to
+Haskell AST. Accelerate's implementation has overridden much of the Haskell
+operators required for this translation stage so the bulk of the effort went
+into producing the functions that contained the computation. These functions
+take the following form:
 
 \begin{verbatim}
 avg :: Exp a => Stencil3x3 a -> Exp a

@@ -127,7 +127,12 @@ programming languages; as well as software engineering methodology and
 approaches.
 
 \section{Ypnos}
-TODO: talk a little more about having to prepare.
+
+Ypnos is an existing language with a fully formed syntax and a partial reference
+implementation. Before I could start coding the translation from Ypnos to GPU, I
+first had to understand and appreciate the reasoning behind the current choices
+in the language.
+
 \subsubsection{Syntax}
 
 The Ypnos language provides a custom syntax for defining stencil

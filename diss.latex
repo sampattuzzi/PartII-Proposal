@@ -113,11 +113,18 @@ TODO
 
 \chapter{Preparation}
 
-TODO: Summarise section
+In this chapter I will be taking the reader through some of the initial reading
+that was done around the subject and which will be required to understand the
+subsequent chapters of the dissertation. This includes a brief introduction to
+some of Haskell's more advanced features, the Ypnos programming language and the
+Accelerate library, all of which were core technologies and concepts to my
+project.
 
-TODO: Make more discursive, story like.
-
-TODO: Why am I doing all this?
+Furthermore I will take the reader through some of the planning and design
+choices which set the stage for the rest of the project. This includes the
+analysis of the initial system requirements; choice of tools, libraries and
+programming languages; as well as software engineering methodology and
+approaches.
 
 \section{Ypnos}
 TODO: talk a little more about having to prepare.

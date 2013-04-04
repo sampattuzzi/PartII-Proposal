@@ -1271,10 +1271,44 @@ eliminated the need to expose a type variable in the declaration for type
 synonyms (as in section~\ref{sec:typefam}). Now this can be neatly encapsulated
 within the a GADT.
 
+\section{Constructors and destructors}
 
 \section{Usage}
 
-TODO: Example of usage and replacement
+A description of the system would not be complete with out usage examples. The
+examples in listing~\ref{lst:example} are taken directly from the unit tests for
+the application. They show the usage of the generalized constructors as well as
+the \texttt{run} and \texttt{reduce} primitives.
+
+\begin{hflisting}[label=lst:example,
+caption=Usage of the final system taken from the unit tests.]
+
+-- Take a list of integers and their dimensions and return the sum.
+sum :: [Int] -> (Int, Int) -> Int
+sum xs (x,y) =  reduceG (mkReducer (+) (+) 0 id) arr
+    where arr = fromList (Z :. x :. y) (cycle xs)
+
+-- Run a floating point stencil of any type
+runF sten xs (x, y) = gridData \$(TODO: remove from final) (runG sten xs')
+    where xs' = listGrid (Dim X :* Dim Y)
+                         (0, 0) (x, y)
+                         (cycle xs)
+                         mirror
+
+-- The average stencil
+avgY = [funGPU| X*Y:|a  b c|
+                    |d @e f|
+                    |g  h i| ->
+        (a + b + c + d + e + f + g + h + i)/9|]
+
+-- Run the average function on the CPU
+runAvgGPU = runF (GPUArr avgY)
+
+-- Run the average function on the GPU
+runAvgCPU = runF (CPUArr avgY)
+
+\end{hflisting}
+
 
 
 \chapter{Evaluation}

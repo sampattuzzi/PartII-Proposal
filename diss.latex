@@ -1405,7 +1405,19 @@ representative set of calculations. These functions include:
   constitute two of the most common reduction operations over grids.
 \end{itemize}
 
-TODO: Speed up run
+\subsection{Results}
+
+\begin{figure}[h]
+  \includegraphics[width=\textwidth]{figs/run_performance.pdf}
+  \caption{This plot shows the performance of the CPU verse the GPU
+    implementations of the run primitive as it degrades with the grid size
+    increasing. The grids are square in shape and the size given is for one of
+    its dimensions. For comparison, both the average and game of life stencils
+    are depicted. Also shown is the copy-on/off times for the GPU.}
+  \label{fig:runperf}
+\end{figure}
+
+todo: Speed up run
 
 TODO: Reduce
 

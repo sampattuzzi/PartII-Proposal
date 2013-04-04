@@ -4,7 +4,7 @@
 # Note that continuation lines require '\'
 # and that TAB is used after ':' and before unix commands.
 
-DISS = diss.latex
+DISS = diss.latex refs.bib
 
 pandoc = /home/sam/.cabal/bin/pandoc
 
@@ -31,8 +31,7 @@ proposal.pdf:	$(PROP)
 
 diss.pdf:	$(DISS)
 	pdflatex diss.latex
-#	bibtex diss.latex
-	pdflatex diss.latex
+	biber diss
 	pdflatex diss.latex
 
 diss:		diss.pdf

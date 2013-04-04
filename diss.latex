@@ -136,6 +136,330 @@ analysis of the initial system requirements; choice of tools, libraries and
 programming languages; as well as software engineering methodology and
 approaches.
 
+\section{Requirements Analysis}
+
+Requirements analysis undertaken in the early stages of this project allowed
+me to proceed smoothly and identify points of failure early. Each major goal of
+the project was categorized according to priority, difficulty and risk. The
+priority signifies the importance to the completion of the project: essential
+requirements have been marked as high and optional extensions as low. Other
+important factors not mentioned in the proposal have also been included and
+marked as medium priority. The difficulty gave an estimate of how hard certain
+requirements would be to achieve and so help provide a rough estimate of how
+much time and resource should be dedicated to each. The risk embodies how much
+uncertainty was present about the implementation details at the start of the
+project. A high risk requirement is one that could easily take more time than
+initially forseen.
+
+The goals were further devided into functional and non-functional requirement,
+i.e, things that the system must do and things that it must be. Functional
+requirements specify that which I must implement and build during the course of
+the project. Non-function requirements specify how the system should perform and
+as such how it should be tested.
+
+\begin{table}
+\caption{Categorization of the main project requirements.}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\multicolumn{2}{|l|}{Requirements}                       & Priority & Difficulty & Risk    & Functional / Non-Functional \\
+\hline
+\multicolumn{2}{|l|}{Correct translation}                & High     & Medium     & High    & Non-functional              \\
+\hline
+\multicolumn{2}{|l|}{Stencil compilation}                & High     & Hard       & Medium  & Functional                  \\
+\hline
+Primitives                                    & Run      & High     & Medium     & Medium  & Functional                  \\
+\cline{3-6}
+                                              & Reduce   & High     & Medium     & Medium  & Functional                  \\
+\cline{3-6}
+                                              & Iterate  & Low      & Easy       & Low     & Functional                  \\
+\cline{3-6}
+                                              & Zip      & Low      & Hard       & Low     & Functional                  \\
+\hline
+\multicolumn{2}{|l|}{Better scaling than CPU}            & High     & Medium     & High    & Non-functional              \\
+\hline
+\multicolumn{2}{|l|}{Usable API}                         & Medium   & Medium     & Medium  & Non-functional              \\
+\hline
+\end{tabular}
+\end{table}
+
+High risk and high priority requirements had to have special attention paid to
+them in order to prevent the project from slipping. In scheduling the tasks I
+took a risk driven approach by trying to implement the highest risk functional
+requirements first and test the highest risk non-functional requirements
+early. For example, to ensure compilation correctness I took a test driven
+approach to development. I will talk about this in more detail in the
+section~\ref{sec:tdd}.
+
+\subsection{Task Dependencies}
+
+TODO: worth talking about?
+
+\section{Implementation Approach}
+TODO: Things like type classes, families etc. Is this worth including?
+
+\section{Choice of Tools}
+
+As with any good software engineering project I made use of many existing
+tools: both development tools such as programming languages and source control
+as well as libraries for software reuse. In this section I will highlight the
+choices of programming language, development tools and libraries. For each I
+will describe the benefits and drawbacks of the tool as well as the reason for
+which it was chosen.
+
+In order to get familiar with the syntax of both Ypnos and Accelerate as
+well as familiarise myself with the tools I would be using in the project, I
+decided to implement some sample functions in Ypnos and Accelerate. The main
+stencil was an average function (similar in principle to the Gaussian stencil),
+we will see this function more in coming chapters. With this I was able to
+familiarise myself with the embedded languages and prepare for the task of
+implementation.
+
+
+\subsection{Programming Languages}
+
+Haskell was the obvious choice of programming language given that the Ypnos
+programming language is already developed in it. Having not programmed in
+Haskell before I had to become familiar with its more advanced features such as:
+\emph{type classes}, \emph{type families} and \emph{data families}.
+
+Haskell has excellent tools for compilation: strong typing, pattern matching and
+strong parsing libraries (Parsec \ref{}). Using the same language as the
+original implementation allowed for code reuse in areas where the implementation
+do not differ.
+
+It would be possible to write the compiler in another programming language. The
+Haskell library would be written as stub functions that interface with another
+programming language. The approach would invariably lead to producing much
+boiler-plate code with little functionality. Given that Haskell is already a
+great language for implementing compilers in, it doesn't make sense to go to the
+extra effort required to use a different language.
+
+\subsection{Development Tools}
+
+To aid in the fetching of dependencies and the building of various targets I
+used the \emph{Cabal} build system for Haskell (\ref{}). Cabal features
+automatic dependencies resolution and fetching as well as project building
+tools. By writing some toy functions to test my knowledge of the Ypnos language
+I was also able to set up a test build system in Cabal that I would later use in
+the rest of my project. Cabal was chosen as it is the defacto standard for
+building projects in Haskell. It allowed me to automatically fetch and install
+all the dependencies for my project as well as manage their versions and
+compatibility.
+
+\emph{Git} version control was used extensively throughout this project for
+logging and backup. I was already quite familiar with this system before this
+project but it allowed me to make use of some of Git's more advanced features
+such as \emph{stashing}, \emph{sub-projects} and \emph{branching}. It was chosen
+primarily for its more advanced features as well as tight integration with free
+hosting services such as Github. This allowed my project to be frequently backed
+up to the cloud.
+
+\subsection{Libraries}
+
+\subsubsection{Accelerate}
+
+\emph{Accelerate} is a Haskell library which provides GPU accelerated array
+computations. Because the API focuses on generic array operations it is able to
+support multiple back-ends (though at the moment only one is implemented). It is
+really the only library of its kind in Haskell but it is sufficiently powerful
+for our needs. In fact, it already includes some functions for performing
+stencil computations over grids.
+
+I chose Accelerate because of the native Haskell support and stencil
+operations. It allows me to abstract away from compiling to low level C code and
+instead concentrate on translating to a more abstract and general API.
+
+\subsubsection{CUDA}
+
+\emph{CUDA} is a General Purpose GPU platform for NVidia devices. It is the
+oldest framework of its kind but has recently been join by the more
+cross-platform OpenCL. The reason I chose CUDA over OpenCL was the library
+support in Haskell. The Accelerate library, on which I was relying, had the most
+stable support for CUDA (though some experimental support for OpenCL
+exists). Furthermore, the GPU made available to me for testing and development
+supported both CUDA and OpenCL making it easy for me to use either.
+
+As I do not own a machine with a CUDA enabled graphics card, I was using a
+remote machine located in the Computer Laboratory. The sample functions allowed
+me to set up the machine with the drivers and configuration required in order to
+run the Accelerate library.
+
+
+\section{Software Engineering Techniques}
+
+Third year projects are long-running software engineering projects and as such
+require the use of software engineering techniques to ensure that the final
+result arrives on time, doesn't fall short of it's requirements and doesn't give
+way to complexity. To achieve this all methods of software engineering start
+with a requirements analysis followed by a plan of action.
+
+
+\subsection{Iterative Development}
+
+In some projects tools are already well know and similar products have already
+been produced. This was not the case with my project as I was new to the tools
+and the way of thinking about problem solving in Haskell. So to ensure a final
+product that gave the best results I decided on using the \emph{interative}
+model~\cite{cockburn08} to develop this project.
+
+Iterative development sets aside time to go back and revise part of the system
+with the new knowledge gathered from its implementation. In variably in
+implementation we discover new information which requires us to go back and
+rework the system. The most famous historical examples have been revisions to
+requirements and user interface but often also the technical architecture itself
+is affected by implementation information.
+
+\begin{figure}
+  \centering
+  \includegraphics{./figs/Iterative_development_model_V2.jpg}
+  \caption{One possible iterative development cycle. In the case of my project
+    the deployment stage happened at the deadline and did not include a roll-out
+    to actual customers. \\ \emph{Image courtesy of Wikipedia}}
+  \label{fig:iterative}
+\end{figure}
+
+An iteratively developed project starts with an inception phase in which initial
+requirements and goals are layed out. The project then proceeds through cycles
+which consist of the following stages (see figure~\ref{fig:iterative}):
+
+\begin{itemize}
+\item
+  Gather requirements
+\item
+  Design
+\item
+  Coding
+\item
+  Testing
+\item
+  Examine
+\end{itemize}
+
+The first and last stages in the cycle merge together as requirements for the
+next iteration feed of the examination of the last. After each cycle there is an
+optional deployment phase in which the product is put into the users
+environment. This phase was not used in this project.
+
+Iterative development may be run \emph{ad infinitum} or it allowed to finish
+once certain criteria have been met or resources depleted. For me the limiting
+resource was the time allocated for this project and the finishing criteria were
+the goals laid out in the initial proposal, namely the success criterion.
+
+In this project various approaches where produced and redesigned informed from
+the failings of the last. A risk driven approach was taken where the most
+difficult parts of the system were attempted first in order to reduce the amount
+of uncertainty in the project as it progressed.
+
+\subsection{Test Driven Development}
+\label{sec:tdd}
+
+The correctness of my implementation was a central goal from the beginning of
+the project. In order to achieve this I took a test driven approach to
+development. This meant that while writing the implementation I was
+simultaneously writing unit tests for that code.  The approach allowed me to
+quickly and effectively find bugs which had not already been found by the
+Haskell type system.
+
+\emph{QuickCheck} is Haskell's defacto standard unit testing library. In most
+unit testing libraries for other platforms, the programmer has to provide sets
+of test data for the library to check against the program.  The code for
+generating this data is left to the programmer. QuickCheck takes a different
+approach. Instead of specifying testing functions which include the test
+generation, we specify properties which take the data to be tested as an
+argument. We then leave the generation of this data up to the library.
+
+QuickCheck is able to generate random testing data for most built in Haskell
+data types. For user defined types, the programmer must provide an instance of
+the class \texttt{Arbitrary} which allows QuickCheck to generate random samples
+for testing.
+
+\section{Haskell}
+
+Haskell is a functional programming language with a strong type system. The core
+feature of the Haskell programming language is its type system which includes
+many optional extensions. For this project it was important to understand a few
+of these, namely: \emph{type classes} which are core to Haskell's polymorphism;
+\emph{associated data types}; and \emph{associated type families} which are both
+extensions to standard type classes.
+
+\subsection{Type Classes}
+
+In Haskell we have both \emph{parametric} and \emph{ad-hoc} polymorphism. The
+former is provided by default in function definitions: each function is made to
+work over the most general type possible. The later is provided via the
+mechanism of \emph{type classes}.
+
+A type class works by specifying a declaration akin to interfaces in
+OOP. We may then declare which types are instances of which class. The
+declaration specifies functions and signatures which have to be provided by
+class instances. Listing \ref{lst:typeclass} gives an example of a type class
+declaration and instance.
+
+\begin{hflisting}[label=lst:typeclass, caption={An example type class for
+    equality. Showing the declaration and the instance for integers.}]
+
+class Eq a where
+  (==) :: a -> a -> Bool
+
+instance Eq Integer where
+  x == y =  x `integerEq` y
+
+\end{hflisting}
+
+\subsection{Type Families}
+
+Type families (also know as indexed type families) allow us to apply the same
+kind of ad-hoc polymorphism to the types. Formally data families are type
+functions which when types are applied result in a type. As with type classes we
+have both interface and instance definitions. The interface describes the
+\emph{kind} of the family which is the type of types and defines how many type
+arguments are taken.
+
+Type families come in two flavours: data families and type synonym families. The
+former allows the data type to be declared differently for different indexes
+whereas the later allows different types to by
+synonymous. Listings~\ref{lst:datafam} and \ref{lst:typesynfam} gives an example
+of these two flavours.
+
+Both flavours can be associated with a type class. In this case the index of the
+type class must form part of the index of the type family. The interface
+declaration of the type family coincides with that of its class as does the
+instance. Listing~\ref{lst:assoctypefam} gives an example of an associated data
+family. Usage is similar for a type synonym family.
+
+\begin{hflisting}[label=lst:datafam, caption=The data family declares two
+  different constructors for a stencil depending on the type of array the
+  stencil is run on.]
+
+data family Stencil :: * -> *
+data instance Stencil CPUArray = CPUStencil
+data instance Stencil GPUArray = GPUStencil
+
+\end{hflisting}
+
+\begin{hflisting}[label=lst:typesynfam, caption=The type synonym family is used
+  as a function to work out what the element type of a collection is.]
+
+type family Elem :: * -> *
+type instance Elem [e] = e
+type instance Elem (Array e) = e
+
+\end{hflisting}
+
+\begin{hflisting}[label=lst:assoctypefam, caption={The data family from
+  listing~\ref{lst:datafam} has now been associated with the class
+  \texttt{Runnable} for certain types of array.}]
+
+class Runnable a where
+  data family Stencil a x y :: *
+  run :: Stencil a x y -> a x -> a y
+
+instance Runnable CPUArray where
+  data family Stencil CPUArray x y = CPUStencil x y
+  run = CPURun
+
+\end{hflisting}
+
 \section{Ypnos}
 
 Ypnos is an existing language with a fully formed syntax and a partial reference
@@ -366,196 +690,19 @@ With these two parameters we have defined an operation performs the
 stencil convolution.
 
 
-\section{Requirements Analysis}
-
-Requirements analysis undertaken in the early stages of this project allowed
-me to proceed smoothly and identify points of failure early. Each major goal of
-the project was categorized according to priority, difficulty and risk. The
-priority signifies the importance to the completion of the project: essential
-requirements have been marked as high and optional extensions as low. Other
-important factors not mentioned in the proposal have also been included and
-marked as medium priority. The difficulty gave an estimate of how hard certain
-requirements would be to achieve and so help provide a rough estimate of how
-much time and resource should be dedicated to each. The risk embodies how much
-uncertainty was present about the implementation details at the start of the
-project. A high risk requirement is one that could easily take more time than
-initially forseen.
-
-The goals were further devided into functional and non-functional requirement,
-i.e, things that the system must do and things that it must be. Functional
-requirements specify that which I must implement and build during the course of
-the project. Non-function requirements specify how the system should perform and
-as such how it should be tested.
-
-\begin{table}
-\caption{Categorization of the main project requirements.}
-\begin{tabular}{|l|l|l|l|l|l|}
-\hline
-\multicolumn{2}{|l|}{Requirements}                       & Priority & Difficulty & Risk    & Functional / Non-Functional \\
-\hline
-\multicolumn{2}{|l|}{Correct translation}                & High     & Medium     & High    & Non-functional              \\
-\hline
-\multicolumn{2}{|l|}{Stencil compilation}                & High     & Hard       & Medium  & Functional                  \\
-\hline
-Primitives                                    & Run      & High     & Medium     & Medium  & Functional                  \\
-\cline{3-6}
-                                              & Reduce   & High     & Medium     & Medium  & Functional                  \\
-\cline{3-6}
-                                              & Iterate  & Low      & Easy       & Low     & Functional                  \\
-\cline{3-6}
-                                              & Zip      & Low      & Hard       & Low     & Functional                  \\
-\hline
-\multicolumn{2}{|l|}{Better scaling than CPU}            & High     & Medium     & High    & Non-functional              \\
-\hline
-\multicolumn{2}{|l|}{Usable API}                         & Medium   & Medium     & Medium  & Non-functional              \\
-\hline
-\end{tabular}
-\end{table}
-
-High risk and high priority requirements had to have special attention paid to
-them in order to prevent the project from slipping. In scheduling the tasks I
-took a risk driven approach by trying to implement the highest risk functional
-requirements first and test the highest risk non-functional requirements
-early. For example, to ensure compilation correctness I took a test driven
-approach to development. I will talk about this in more detail in the
-section~\ref{sec:tdd}.
-
-\subsection{Task Dependencies}
-
-TODO: worth talking about?
-
-\section{Implementation Approach}
-TODO: Things like type classes, families etc
-
-\section{Choice of Tools}
-
-\subsection{Programming Languages}
-\subsection{Development Tools}
-
-\subsection{Libraries}
-
-\subsubsection{Accelerate}
-
-TODO: why did I choose it.
-
-\subsubsection{Learning}
-
-In order to get familiar with the syntax of these both Ypnos and Accelerate I
-decided to implement some sample functions in both, the main one being the
-average function we have already seen. With this I was able to familiarise
-myself with the embedded languages and prepare for the task of implementation.
-
-Furthermore, this allowed me to become familiar with the other tools I would be
-using in this project, namely:
-
-TODO: Move elsewhere
-\begin{itemize}
-\item
-  Haskell, the programming language. Having not used this before I had
-  to get familiar with the syntax as well as some of the more advanced
-  type system features and extensions such as: \emph{type classes},
-  \emph{type families} and \emph{data families}.
-\item
-  Cabal, a build system for Haskell with automatic dependencies
-  resolution and fetching. The toy functions allowed me to test setting
-  up a build system which I would later use for the rest of the project.
-\item
-  Git, the version control system. I was already quite familiar with
-  this system before this project but it allowed me to make use of some
-  of Git's more advanced features such as \emph{stashing},
-  \emph{sub-projects} and \emph{branching}.
-\item
-  CUDA, the drivers and library. As I do not own a machine with a CUDA
-  enabled graphics card, I was using a remote machine located in the
-  Computer Laboratory. The sample functions allowed me to set up the
-  machine with the drivers and configuration required in order to run
-  the Accelerate library.
-\end{itemize}
-
-TODO: Requirements analysis plus other software engineering techniques
-
-\section{Software Engineering Techniques}
-
-Third year projects are long-running software engineering projects and as such
-require the use of software engineering techniques to ensure that the final
-result arrives on time, doesn't fall short of it's requirements and doesn't give
-way to complexity. To achieve this all methods of software engineering start
-with a requirements analysis followed by a plan of action.
-
-
-\subsection{Iterative Development}
-
-In some projects tools are already well know and similar products have already
-been produced. This was not the case with my project as I was new to the tools
-and the way of thinking about problem solving in Haskell. So to ensure a final
-product that gave the best results I decided on using the \emph{interative}
-model to develop this project.
-
-Iterative development sets aside time to go back and revise part of the system
-with the new knowledge gathered from its implementation. In variably in
-implementation we discover new information which requires us to go back and
-rework the system. The most famous historical examples have been revisions to
-requirements and user interface but often also the technical architecture itself
-is affected by implementation information.
-
-TODO: Diagram
-
-An iteratively developed project starts with an inception phase in which initial
-requirements and goals are layed out. The project then proceeds through cycles
-which consist of the following stages:
-
-\begin{itemize}
-\item
-  Gather requirements
-\item
-  Design
-\item
-  Coding
-\item
-  Testing
-\item
-  Examine
-\end{itemize}
-
-The first and last stages in the cycle merge together as requirements for the
-next iteration feed of the examination of the last. After each cycle there is an
-optional deployment phase in which the product is put into the users
-environment. This phase was not used in this project.
-
-Iterative development may be run \emph{ad infinitum} or it allowed to finish
-once certain criteria have been met or resources depleted. For me the limiting
-resource was the time allocated for this project and the finishing criteria were
-the goals laid out in the initial proposal, namely the success criterion.
-
-In this project various approaches where produced and redesigned informed from
-the failings of the last. A risk driven approach was taken where the most
-difficult parts of the system were attempted first in order to reduce the amount
-of uncertainty in the project as it progressed.
-
-\subsection{Test Driven Development}
-\label{sec:tdd}
-
-The correctness of my implementation was a central goal from the beginning of
-the project. In order to achieve this I took a test driven approach to
-development. This meant that while writing the implementation I was
-simultaneously writing unit tests for that code.  The approach allowed me to
-quickly and effectively find bugs which had not already been found by the
-Haskell type system.
-
-\emph{QuickCheck} is Haskell's defacto standard unit testing library. In most
-unit testing libraries for other platforms, the programmer has to provide sets
-of test data for the library to check against the program.  The code for
-generating this data is left to the programmer. QuickCheck takes a different
-approach. Instead of specifying testing functions which include the test
-generation, we specify properties which take the data to be tested as an
-argument. We then leave the generation of this data up to the library.
-
-QuickCheck is able to generate random testing data for most built in Haskell
-data types. For user defined types, the programmer must provide an instance of
-the class \texttt{Arbitrary} which allows QuickCheck to generate random samples
-for testing.
-
 \section{Summary}
+
+In this section we have seen an analysis of the project's requirements which
+allowed me to prioritise the work for the project. Based on the requirements a
+choice of tools and libraries was made. Throughout the project an iterative
+approach to development was chosen to meet as many of the requirements as
+possible in the given time.
+
+At the beginning of the project, time was spent on familiarisation with the
+tools and libraries as well as the Ypnos language itself. Complex parts of the
+Haskell language were investigated and understood (type classes and
+families). The Accelerate library, central to the project, was investigated and
+``toy'' programs were implemented in both Ypnos and Accelerate.
 
 \chapter{Implementation}
 

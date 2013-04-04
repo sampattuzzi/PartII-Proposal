@@ -6,6 +6,8 @@
 \usepackage{amssymb,amsmath}
 \usepackage[unicode=true]{hyperref}
 \usepackage{longtable}
+\usepackage{caption}
+
 \hypersetup{breaklinks=true,
             bookmarks=true,
             pdfauthor={Samuel Pattuzzi},

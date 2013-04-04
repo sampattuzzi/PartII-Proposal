@@ -1178,7 +1178,12 @@ instance RunGrid g where
     type Stencil g a b sten = sten -> Exp b
 \end{hflisting}
 
-NEXT: exposed sten. Not very nice or general
+As we see, using associated type families is not very nice or general because we
+are exposing \texttt{sten}: a type variable which has no relevance to the CPU
+implementation. Though it can be safely ignore it exposes too much of the
+underlying type difference we are actually coding for and so doesn't decouple
+the two implementations very well. As we will see in section~\ref{sec:final},
+this problem can be mitigated by taking a mixed approach.
 
 \subsection{Associated data families}
 

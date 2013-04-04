@@ -69,14 +69,44 @@
 \chapter{Introduction}
 
 In this project I created a compiler for the Ypnos programming
-language~\cite{ypnos-damp10, ypnos-dsl11} that targets modern GPUs allowing for massive
-speed-ups of programs in this language. The language allows programmers to use a
-very concise syntax to describe certain types of parallel grid operations. Using
-this syntax they are now able to target machines both with and without
-compatible GPUs.
+language~\cite{ypnos-damp10, ypnos-dsl11} that targets modern GPU allowing for
+massive speed-ups of programs in this language. The language allows programmers
+to use a very concise syntax to describe certain types of parallel grid
+operations. Using this syntax they are now able to target machines both with and
+without compatible GPU.
 
 \section{Motivation}
-TODO: talk about the need for parallelisation on GPUs
+
+GPUs have always been great at exploiting SIMD parallelism for graphics
+applications. In recent years, however, the GPU pipeline has become more general
+than ever. Beyond just providing programmable shaders this platform has been
+opened up to more general purpose usage such as video codec acceleration and
+even scientific computing. The ubiquity and low cost of this hardware opens up
+an opportunity for researchers, professionals and hobbyists alike.
+
+The one hurdle to unlocking this increased computation power is the
+programming models enforced by the API. The API of such general purpose GPU
+(GPGPU) tends to be low level but at the same time restricted in ways that may
+be unfamiliar to the user. Particularly, memory access within a thread is hugely
+limited to allow effective parallelism. This requires the users of these
+the API to undergo a steep learning curve to achieve such speed-ups.
+
+An alternative to using these lowest level API is higher level computational
+paradigms which are able to expose the SIMD parallelism of a program. Often
+these paradigms aren't as powerful as the underlying API but allow for very
+concise programs within a certain field of interest. For example in video
+editing we are interested in fast decoding and so a GPU accelerated decoding
+library would enable us to easily take advantage of GPU speed-ups without
+writing the low-level code. In the field of scientific computing many
+operations can be described in terms of matrix operations so a matrix
+manipulation library could expose the SIMD parallelism needed.
+
+The approach taken in the Ypnos programming language is to target a type of
+computation common to graphics algorithms and certain scientific simulation. By
+taking a simple and easy to learn paradigm and combining it with a declarative
+API, Ypnos is able to exploit as much SIMD parallelism as needed under the
+surface. Furthermore, Ypnos is backend-agnostic meaning that a program written
+in it can easily be transported from a GPU to a multi-core CPU.
 
 \section{Related work}
 

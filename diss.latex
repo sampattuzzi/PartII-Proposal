@@ -8,10 +8,17 @@
 \usepackage{longtable}
 \usepackage{caption}
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{refs.bib}
+\DefineBibliographyStrings{english}{%
+  bibliography = {References},
+}
+
 \hypersetup{breaklinks=true,
             bookmarks=true,
             pdfauthor={Samuel Pattuzzi},
             pdftitle={GPU Accelerating the Ypnos Programming Language},
+            pagebackref=true,
             colorlinks=true,
             urlcolor=blue,
             linkcolor=magenta,
@@ -57,11 +64,12 @@
 
 \chapter{Introduction}
 
-In this project I created a compiler for the Ypnos programming language that
-targets modern GPUs allowing for massive speed-ups of programs in this
-language. The language allows programmers to use a very concise syntax to
-describe certain types of parallel grid operations. Using this syntax they are
-now able to target machines both with and without compatible GPUs.
+In this project I created a compiler for the Ypnos programming
+language~\cite{ypnos-damp10, ypnos-dsl11} that targets modern GPUs allowing for massive
+speed-ups of programs in this language. The language allows programmers to use a
+very concise syntax to describe certain types of parallel grid operations. Using
+this syntax they are now able to target machines both with and without
+compatible GPUs.
 
 \section{Motivation}
 TODO: talk about the need for parallelisation on GPUs
@@ -105,10 +113,10 @@ calculations and operations as matrix equations. The library contains operations
 such as \texttt{map}, \texttt{zip} and \texttt{fold} implemented efficiently as
 well its own stencil convolution function.
 
-\emph{Accelerate} is an EDSL for the Haskell language which implements
-parallel array computations on the GPU. The primary target GPUs are
-those which support NVIDIA's CUDA extension for GPGPU programming.
-Accelerate uses algorithm skeletons for online CUDA code generation.
+\emph{Accelerate}~\cite{acc-damp11} is an EDSL for the Haskell language which
+implements parallel array computations on the GPU. The primary target GPUs are
+those which support NVIDIA's CUDA extension for GPGPU programming.  Accelerate
+uses algorithm skeletons for online CUDA code generation.
 
 \section{Summary}
 TODO
@@ -1242,7 +1250,7 @@ While not mentioned in my original proposal, the useability to the
 programmer is another non-functional requirement. I decided that
 performing a full usability study would be unnecessary as this was a
 secondary requirement. Instead I have chosen to evaluate the usability
-using the method of \emph{Cognitive Dimensions}{[}TODO:ref{]} to compare
+using the method of \emph{Cognitive Dimensions}~\cite{green96} to compare
 the various approaches already discussed.
 
 Cognitive Dmensions of notations (CD) provide a light weight vocabulary
@@ -1582,5 +1590,7 @@ was beyond the scope of this project.
 \section{Lessons Learnt}
 
 \section{Future Work}
+
+\printbibliography[heading=bibintoc]
 
 \end{document}

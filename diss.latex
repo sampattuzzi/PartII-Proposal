@@ -1195,6 +1195,43 @@ this problem can be mitigated by taking a mixed approach.
 
 \subsection{Associated data families}
 
+As opposed to specifying the stencil type as an associated type family we may
+wish be explicit in which type of stencil function we are creating: much like
+the using a type class parameter. To achieve this we can make use of another
+Haskell type system extension called associated data families. These work in
+much the same way type families except that rather than binding a particular
+synonym to a class we bind a type definition: a data type in Haskell parlance.
+
+So how would the definition of the \texttt{RunGrid} type class look using data
+families? We can see in listing~\ref{lst:rundatafam} that the data family has
+replaced both the type and constraint families from section~\ref{sec:typefam}.
+
+\begin{hflisting}[label=lst:rundatafam,
+caption=RunGrid with associated data family.]
+class RunGrid g where
+    data Sten g a b :: *
+    runG :: Sten g a b -> g a -> g b
+\end{hflisting}
+
+We are able to do this due to another Haskell type extension called
+\emph{generalized algebraic data types} (GADTs) which allow us to place
+arbitrary type constraints on constructors (see listing~\ref{lst:stendatafam})
+This makes for much cleaner implementation on our part but does require the
+programmer to use different data constructors for the different implementations
+(CPU verse GPU stencil functions). This is manageable when we are only dealing
+with the different stencil types however when we add in the different types of
+reduction function too this makes for a lot of changes to the code on the
+programmers side.
+
+\begin{hflisting}[label=lst:stendatafam,
+caption=An example of a stencil data type for the GPU]
+data Sten (Array sh) a b where
+        Sten :: (Shape sh, Stencil sh a sten,
+                 Elt a, Elt b) =>
+                (sten -> Exp b)
+                -> Sten (Array sh) a b
+\end{hflisting}
+
 \subsection{Final implementation}
 
 TODO: run implementation

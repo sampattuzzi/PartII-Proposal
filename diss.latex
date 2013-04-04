@@ -49,6 +49,10 @@
 {\begin{snugshade}\begin{quote}\openquote}
 {\hfill\closequote\end{quote}\end{snugshade}}
 
+\lstnewenvironment{hflisting}[1][]
+  {\lstset{language=Haskell,float=tb,captionpos=b,#1}}% \begin{javalisting}[...]
+  {} % \end{javalisting}
+
 \title{GPU Accelerating the Ypnos Programming Language}
 \author{Samuel Pattuzzi}
 \date{March 2013}
@@ -513,9 +517,9 @@ stencils with grids to produce the computations they want. The main
 primative in Ypnos is the \emph{run} primative which applies the stencil
 computation to a grid.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 run :: (Grid D a -> b) -> Grid D a -> Grid D b
-\end{verbatim}
+\end{hflisting}
 
 The application is done by moving the stencil cursor over each location
 in the grid. The arguments of the stencil are taken from positions in
@@ -544,19 +548,19 @@ primative whose purpose is to summarise the contents of a grid in one
 value. It may be used to compute functions such as the mean, sum or
 minimum/maximum.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 reduce :: (a -> a -> a) -> Grid D a -> a
-\end{verbatim}
+\end{hflisting}
 
 The primative uses an associative operator (of type
 \texttt{a -\textgreater{} a -\textgreater{} a}) to combine all the
 elements of the grid to one value. A more general version of this
 operator also exists which support an intermediary type.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 reduceR :: Reducer a b -> Grid D a -> a mkReducer :: exists b. (a -> b -> b)
 -> (b -> b -> b) -> b -> (b -> c) -> Reducer a
-\end{verbatim}
+\end{hflisting}
 
 The \emph{Reducer} data type takes parameters:
 
@@ -617,10 +621,10 @@ transfer. All other operations build an AST to be compiled by the run
 primitive. Together use and run form the constructors and destructors of
 the \texttt{Acc} data type.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 use :: Array sh e -> Acc (Array sh e)
 run :: Acc (Array sh e) -> Array sh e
-\end{verbatim}
+\end{hflisting}
 
 \subsubsection{A stratified language}
 
@@ -637,9 +641,9 @@ operations and the later represents scalar computations.
 
 The map function would then looks like this:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 map :: (Exp a -> Exp b) -> Acc (Array sh a) -> Acc (Array sh b)
-\end{verbatim}
+\end{hflisting}
 
 Scalar operations do not support any type of iteration or recursion in
 order to prevent the asymmetric operation run time. However, most other
@@ -651,10 +655,10 @@ For example, in the support of addition, subtraction and other numerical
 operations, Accelerate provides an instance of the type class
 \texttt{Num}. This means that operations can be typed as follows:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 (+) :: Num a => Exp a -> Exp a -> Exp a
 1 + 2 + 3 :: Exp Integer
-\end{verbatim}
+\end{hflisting}
 
 \subsubsection{Stencil support}
 
@@ -663,7 +667,7 @@ a whole grid, the map function being an example of this. Accelerate
 provides support for stencil computations via the \texttt{stencil}
 function.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 stencil :: Stencil sh a sten =>
            (sten -> Exp b) ->
            Boundary a ->
@@ -673,7 +677,7 @@ stencil :: Stencil sh a sten =>
 instance Stencil DIM2 a ((Exp a, Exp a, Exp a)
                         ,(Exp a, Exp a, Exp a)
                         ,(Exp a, Exp a, Exp a))
-\end{verbatim}
+\end{hflisting}
 
 The first parameter is a function which represent the stencil. We see
 that \texttt{sten}, the stencil pattern, takes the form of a tuple grid
@@ -716,7 +720,7 @@ operators required for this translation stage so the bulk of the effort went
 into producing the functions that contained the computation. These functions
 take the following form:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 avg :: Exp a => Stencil3x3 a -> Exp a
 avg (( _, a, _ )
     ,( b, c, d )
@@ -725,7 +729,7 @@ avg (( _, a, _ )
 type Stencil3x3 = ((Exp a, Exp a, Exp a)
                   ,(Exp a, Exp a, Exp a)
                   ,(Exp a, Exp a, Exp a))
-\end{verbatim}
+\end{hflisting}
 
 The arguments are formed as tuples of tuples. The rest of the stencil
 appears to be normal Haskell code. However, the return type,
@@ -745,13 +749,13 @@ Take for example the situation in which we want to write an embedded
 language to act as a calculator. We have the following AST for our
 simple calculator:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 data Expr  =  IntExpr Integer
            |  BinopExpr (Integer -> Integer -> Integer) Expr Expr
 
 e1 = BinopExpr (+) (IntExpr 1) (IntExpr 3)
 e2 = [expr| 1 + 3 |]
-\end{verbatim}
+\end{hflisting}
 
 We see that the quasiquoter \texttt{expr} allows us to appreviate the
 expression \texttt{e1} to the more obvious form of \texttt{e2}.
@@ -779,12 +783,12 @@ at the precise differences between them in the types of our stencil
   type constraints relating to boundaries as these are very long and
   complicated.}:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 avgCPU :: (IArray UArray a, Fractional a) =>
           Grid (Dim X :* Dim Y) b dyn a -> a
 avgGPU :: Floating (Exp a) =>
           Stencil3x3 a -> Exp a
-\end{verbatim}
+\end{hflisting}
 
 In the GPU case we see that the type (once expanded) is tuples of tuples
 of \texttt{Exp a}. This allows Accelerate to make use of the built in
@@ -797,9 +801,9 @@ This is no accident as Ypnos grid type is a comonad, the theoretic dual
 of the of the monad. This restrains the type of the run operation to be
 of the form:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 cobind :: (D a -> b) -> D a -> D b
-\end{verbatim}
+\end{hflisting}
 
 Where we let \texttt{D} be a grid of a certain dimension and \texttt{a}
 and \texttt{b} be the types of that grid.
@@ -822,13 +826,13 @@ This is perhaps best illustrated by example. Say that we have the
 following one dimensional stencil with the cursor at an off-centre
 location (denoted by \texttt{c}).
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
           b
   *---------------*
   | _ | c | _ | _ |
   *---*   *-------*
     a       b-a-1
-\end{verbatim}
+\end{hflisting}
 
 We define the variables $a$ to be the position of the cursor and $b$ to
 be the length of the stencil. Now we must find how much we must pad at
@@ -841,13 +845,12 @@ by the following two equations:
 
 This means that after centring we get the following:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
          coffset roffset
           *---*   *---*
   | _ | _ | c | _ | _ |
-\end{verbatim}
-
 \subsection{Centring}
+\end{hflisting}
 
 In order to implement the centring I had to consider both the one and
 two dimensional cases. It would be quite easy to deal with this deal
@@ -858,11 +861,11 @@ as intermediaries; and operating on the grid patterns directly via type
 classes. Before addressing the approaches I will mention the types we
 were converting.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 data GridPattern =
     GridPattern1D DimTag [VarP] |
     GridPattern2D DimTag DimTag [[VarP]]
-\end{verbatim}
+\end{hflisting}
 
 \texttt{GridPattern} is the type in the Ypnos AST corresponding to the
 parsed pattern of arguments. We see that it takes both a 1D and 2D form
@@ -903,14 +906,14 @@ class \texttt{GridIx} to perform the basic operations -
 \texttt{addBefore}, \texttt{addAfter}, \texttt{find} and \texttt{size} -
 in a dimension sensitive way while still being polymorphic.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 class (Ix i, Num i, ElMax i) => GridIx i where
     data GridPatt i :: * -> *
     addBefore :: i -> a -> GridPatt i a -> GridPatt i a
     addAfter :: i -> a -> GridPatt i a -> GridPatt i a
     find :: (a -> Bool) -> GridPatt i a -> i
     size :: GridPatt i a -> i
-\end{verbatim}
+\end{hflisting}
 
 The associated data type \texttt{GridPatt} would take the type of the
 particular dimensionality of list that is appropriate for a given
@@ -935,9 +938,9 @@ overhead.
 As already seen, we would like the \texttt{run} primitive to take the
 form:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 run :: Comonad g => (g a -> b) -> g a -> g b
-\end{verbatim}
+\end{hflisting}
 
 We have also seen that Accelerate does not accept stencils of this form.
 To solve this we previously broke the the comonadicity of the operation
@@ -1002,10 +1005,10 @@ The initial of run was linked to the compile time implementation of the
 stencil function. At the highest level this meant that the function
 \texttt{run} had the following type:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 run :: (Stencil sh x sten) =>
        (sten -> Exp y) -> Grid d Nil Static x -> Grid d Nil Static y
-\end{verbatim}
+\end{hflisting}
 
 However, we see that the type of \texttt{sh} (required by Accelerate)
 and \texttt{d} (required by Ypnos) do not unify directly requiring
@@ -1056,7 +1059,7 @@ allows us to extract parts of the type that change to give a
 (semi-)unified type. As the reduce primitive was the first to bring
 about such issues lets examine how this approach can be applied to it.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 class ReduceGrid grid a b c | grid -> a,
                               grid -> b,
                               grid -> c where
@@ -1077,7 +1080,7 @@ class RunGrid grid sten | grid -> sten where
 
 instance RunGrid CPUGrid CPUStencil
 instance RunGrid GPUGrid GPUStencil
-\end{verbatim}
+\end{hflisting}
 
 In this approach we are able to have instances for \texttt{Reducer} for
 the CPU and GPU based on the grid type yet we also change the types of
@@ -1099,7 +1102,7 @@ So in theory this approach should work however, we encounter problems
 with the useability of this approach. Let's further examine the the type
 of the \texttt{reduceG} primitive when applied to \texttt{GPUGrid}s:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 Reducer :: (Exp a -> Exp b -> Exp b)
         -> (Exp b -> Exp b -> Exp b)
         -> (Exp b) -- Default value
@@ -1108,7 +1111,7 @@ Reducer :: (Exp a -> Exp b -> Exp b)
 reduceG :: Reducer (Exp a) (Exp b) (Exp c)
         -> GPUGrid
         -> Exp c -- Return value
-\end{verbatim}
+\end{hflisting}
 
 Notice that both the return value and default value have type
 \texttt{Exp} which is problematic as \emph{lifting} and \emph{unlifting}
@@ -1127,13 +1130,13 @@ families to achieve the different function types we are looking for.
 The ideal type for the \texttt{Reducer} in the GPU implentation would
 be:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 Reducer :: (Exp a -> Exp b -> Exp b)
         -> (Exp b -> Exp b -> Exp b)
         -> b
         -> (Exp b -> Exp c)
 reduceG :: Reducer a b c -> GPUGrid -> c
-\end{verbatim}
+\end{hflisting}
 
 Clearly this is an improvement to the user as they get a simple value
 they know what to do with. By examining this we can deduce that there
@@ -1141,7 +1144,7 @@ are actually two of abstract function involved: 1 arguments functions of
 \texttt{Exp}s and 2 argument. If we implement these we as two associated
 type families we get the behaviour we want:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 Reducer :: Fun2 g a b b
         -> Fun2 g b b b
         -> b
@@ -1151,7 +1154,7 @@ class ReduceGrid g where
     type Fun1 g a b
     type Fun2 g a b c
     reduceG :: Reducer g a b c -> g -> c
-\end{verbatim}
+\end{hflisting}
 
 Next I wanted to extend this approach to run. However, with the run
 primitive we do not simply have a conversion of types but also
@@ -1162,7 +1165,7 @@ family has the \emph{kind} of \texttt{Constraint} instead of the usual
 \texttt{*} (denoting type). Here is an example of the \texttt{RunGrid}
 class modified in this way:
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 class RunGrid g where
     type ConStencil g a b sten :: Constraint
     type Stencil g a b sten :: *
@@ -1171,7 +1174,7 @@ class RunGrid g where
 instance RunGrid g where
     type ConStencil g a b sten = (Stencil sh a ~ sten, ShapeOf g ~ sh)
     type Stencil g a b sten = sten -> Exp b
-\end{verbatim}
+\end{hflisting}
 
 NEXT: exposed sten. Not very nice or general
 
@@ -1377,11 +1380,11 @@ one-dimensional grid for this case as the built in Haskell function we
 are comparing against is one-dimensional. The resulting reduced values
 are compared and an failure is registered if they should differ.
 
-\begin{verbatim}
+\begin{hflisting}[label=TODO, caption=TODO]
 write  --->  compile   --->   test   --->   commit
 code             |              |              |
   ^--------------+--------------+--------------+
-\end{verbatim}
+\end{hflisting}
 
 For the large part of the project I have been coding tests and
 implementation in parallel (also known as Test Driven Development or

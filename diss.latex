@@ -36,6 +36,7 @@
 \usepackage{libertine} % or any other font package (or none)
 \usepackage[T1]{fontenc}
 
+\newcommand*\quotefont{\fontfamily{fxl}} % selects Libertine for quote font
 \usepackage{tikz}
 \usepackage{framed}
 % Make commands for the quotes
@@ -1445,16 +1446,31 @@ representative set of calculations. These functions include:
     increasing. The grids are square in shape and the size given is for one of
     its dimensions. For comparison, both the average and game of life stencils
     are depicted. Also shown is the copy-on/off times for the GPU.}
-  \label{fig:runperf}
+  \label{fig:runperf100}
 \end{figure}
 
-todo: Speed up run
+The results of the benchmarking showed that the GPU implementation outperforms
+for grids of width greater than 70. This is in accordance with the expected
+outcome: that GPU is able to perform better modulo copy on/off times.
 
-TODO: Reduce
+On a scale of 0-100 (see figure~\ref{fig:runperf100}), the slow down of the GPU
+is barely visible above random variation. However, on a greater scale
+(figure~\ref{fig:runpref1000}) it is clear that the performance is actually
+degrading, albeit much slower than the CPU performance.
+
+The ceiling measurement is the copy on/off time. My implementation by its very
+nature incurs such a cost due to copying the data to and from the GPU. He see
+that on the smaller scale of analysis the ceiling and actual stencils show
+little difference in performance signifying that most of the time is expended in
+copying. On the greater (TODO: do we?) scales we see how the stencil
+computations actually diverge from the ceiling as GPU computation time starts to
+become significant.
+
+TODO: reduce
 
 \subsection{Deducing a model}
 
-TODO: Model of on/off
+It is good to see that
 
 \section{Correctness}
 

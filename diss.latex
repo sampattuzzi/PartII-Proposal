@@ -471,7 +471,7 @@ implementation. Before I could start coding the translation from Ypnos to GPU, I
 first had to understand and appreciate the reasoning behind the current choices
 in the language.
 
-\subsubsection{Syntax}
+\subsection{Syntax}
 
 The Ypnos language provides a custom syntax for defining stencil
 functions as well as a collection of primative operations for their
@@ -509,7 +509,7 @@ The final section of the syntax comes after \texttt{-\textgreater{}} and
 is the computation. This can be most Haskell syntax though recursion and
 function definition is not possible.
 
-\subsubsection{Primitives}
+\subsection{Primitives}
 
 As well as the syntax for stencil functions, Ypnos provides a library of
 primative operations. The primatives allow the programmer to combine the
@@ -597,7 +597,7 @@ operations. There is a further \emph{stratification} of this type into
 scalar and array values with scalar computations being composed into
 array computations.
 
-\subsubsection{GPU computation}
+\subsection{GPU Computation}
 
 Haskell execution happens on the CPU and in main memory whereas GPU
 execution happens in parallel in a separate memory. In order for a
@@ -626,7 +626,7 @@ use :: Array sh e -> Acc (Array sh e)
 run :: Acc (Array sh e) -> Array sh e
 \end{hflisting}
 
-\subsubsection{A stratified language}
+\subsection{Stratified Language}
 
 While the main type of operation in Accelerate is over arrays. However,
 we often want to compose arrays out of multiple scalar values or
@@ -660,7 +660,7 @@ operations, Accelerate provides an instance of the type class
 1 + 2 + 3 :: Exp Integer
 \end{hflisting}
 
-\subsubsection{Stencil support}
+\subsection{Stencil Support}
 
 I have already mentioned that function over scalars can be applied over
 a whole grid, the map function being an example of this. Accelerate
@@ -817,6 +817,8 @@ The advantage of this method (as we will see more in detail when we
 discuss the alternative) is that all the translation effort is done at
 compile time allowing the running of the stencil to be more efficient.
 
+\subsection{Centring}
+
 Another way in which Accelerate and Ypnos stencils differ is that the
 former assumes that the cursor is centred whereas the later allows the
 user to program this. This can be translated by padding the stencil
@@ -849,7 +851,6 @@ This means that after centring we get the following:
          coffset roffset
           *---*   *---*
   | _ | _ | c | _ | _ |
-\subsection{Centring}
 \end{hflisting}
 
 In order to implement the centring I had to consider both the one and
@@ -999,7 +1000,7 @@ functionality of the primitive into a type class. This approach required
 the use of some complicated type features in order to make the types
 unify. However, the final result is much more usable.
 
-\subsection{Non unifying approach}
+\subsection{Non Unifying Approach}
 
 The initial of run was linked to the compile time implementation of the
 stencil function. At the highest level this meant that the function
@@ -1024,7 +1025,7 @@ of the \texttt{run} primitive I decided that a different approach was
 need so this incarnation of the \texttt{reduce} primitive never saw the
 light of day.
 
-\subsection{Type classes}
+\subsection{Introducing Type Classes}
 
 In this project I am aiming both to make and accurate and fast
 translation as well as one which is easy for the programmer to use.
@@ -1051,7 +1052,7 @@ primitives of Ypnos. This is the same thing. However, we run into the
 same problems as with stencil translation (see the section on
 \hyperref[run-time]{run-time stencil translation}).
 
-\subsection{Type class parameter}
+\subsection{Type Class Parameter}
 
 The first approach to solving this problem makes use of the fact that
 Haskell type classes can be parametrized on more than one type. This
@@ -1121,7 +1122,8 @@ introduce dependant type parameters for the functions rather than the
 values and this could work however, I actually took the following
 approach.
 
-\subsection{Associated type families}
+\subsection{Associated Type Families}
+\label{sec:typefam}
 
 We already encountered associated type families in the section on
 {[}direct translation{]}\{\#direct\}. Here we will use these same type
@@ -1190,7 +1192,6 @@ TODO: reduce implementation
 
 TODO: Example of usage and replacement
 
-\subsection{Constructors and destructors}
 
 \chapter{Evaluation}
 

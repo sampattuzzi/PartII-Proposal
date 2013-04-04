@@ -1234,9 +1234,43 @@ data Sten (Array sh) a b where
 
 \subsection{Final implementation}
 
-TODO: run implementation
+\begin{hflisting}[label=lst:final, caption={The final signatures of the
+  \texttt{RunGrid} and \texttt{ReduceGrid} classes.}]
+class RunGrid g arr | arr -> g where
+    type RunCon g arr x y :: Constraint
+    runG :: RunCon g arr x y =>
+            (x `arr` y)
+            -> g x -> g y
 
-TODO: reduce implementation
+class ReduceGrid g where
+    type ConstFun1 g a b :: Constraint
+    type ConstFun2 g a b c :: Constraint
+    type Fun1 g a b
+    type Fun2 g a b c
+    reduceG :: Reducer g a c -> g a -> c
+\end{hflisting}
+
+The final implementation made a trade off between two approaches we have seen
+already. It combines the type parameter for the \texttt{arr} type\footnote{This is
+  effectively the same as having used an associated data type except it requires
+  the data type to be defined outside of class and doesn't require type system
+  extensions.} in the \texttt{RunGrid} class with associated type families for
+constraints and generalized functions in the \texttt{ReduceGrid} class (see
+listing~\ref{lst:final}).
+
+The \texttt{RunGrid} class makes use of functional dependencies to ensure that
+by using an \texttt{arr} constructor the programmer has specified also the grid
+implmentation to be used. As a knocks-on effect this ensures that any subsequent
+uses \texttt{reduceG} is also fixed to the same grid implementation. Using
+generalized constructors and destructors (section~\ref{sec:consdes}) means that
+if the programmer is building their grids from lists then the correct
+implementations grid will be decided based on the \texttt{arr} type used.
+
+By using a type and not type synonyms for the stencil function we have
+eliminated the need to expose a type variable in the declaration for type
+synonyms (as in section~\ref{sec:typefam}). Now this can be neatly encapsulated
+within the a GADT.
+
 
 \section{Usage}
 

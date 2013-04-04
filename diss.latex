@@ -1,5 +1,4 @@
 \documentclass[12pt,a4paper]{scrreprt}
-\usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{calc}
 \usepackage{listings}
@@ -33,8 +32,10 @@
 %Define block quotes
 \usepackage[svgnames]{xcolor}
 \usepackage[utf8]{inputenc}
+
 \usepackage{libertine} % or any other font package (or none)
-\newcommand*\quotefont{\fontfamily{fxl}} % selects Libertine for quote font
+\usepackage[T1]{fontenc}
+
 \usepackage{tikz}
 \usepackage{framed}
 % Make commands for the quotes

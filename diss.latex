@@ -1095,15 +1095,17 @@ values accepted by the funtcions of the reducer. These values correspond
 to different types of functions which is what tells Haskell to use the
 Accelerate overloaded versions of operators.
 
-We also see that the \texttt{RunGrid} type class is treated in a similar
-manner: the type of grid uniquely determines the type of stencil
-function required \footnote{The notation that denotes this in Haskell is
-  \texttt{grid -\textgreater{} sten}. We see this a couple of times in
-  the given example.}. Unlike the \texttt{reduceG} example, Haskell
-cannot, without help from the programmer, choose a different quasiquoter
-(as is required with the \hyperref[type-sys]{static approach}). With the
-run-time approach we may be able to do better but we will see this
-later. (TODO: ensure this forward reference holds)
+We also see that the \texttt{RunGrid} type class is treated in a similar manner:
+the type of grid uniquely determines the type of stencil function required. This
+is achieved in Haskell using a \emph{functional dependency}. The notation that
+denotes this in Haskell is \texttt{grid -\textgreater{} sten}. We see this a
+couple of times in the given example.
+
+Unlike the \texttt{reduceG} example, Haskell cannot, without help from the
+programmer, choose a different quasiquoter (as is required with the
+\hyperref[type-sys]{static approach}). With the run-time approach we may be able
+to do better but we will see this later. (TODO: ensure this forward reference
+holds)
 
 So in theory this approach should work however, we encounter problems
 with the useability of this approach. Let's further examine the the type

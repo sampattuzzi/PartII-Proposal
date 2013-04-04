@@ -808,6 +808,12 @@ cobind :: (D a -> b) -> D a -> D b
 Where we let \texttt{D} be a grid of a certain dimension and \texttt{a}
 and \texttt{b} be the types of that grid.
 
+The type system approach or compile-time approach means that we translate the
+Ypnos stencil syntax directly to a function with Accelerate type
+(e.g. \texttt{avgGPU}). We mask the differences in types using either data
+families or type families. The details, advantages and disadvantage of the two
+approaches will be discussed further in section~\ref{sec:prims}.
+
 Unfortunately, by translating directly to the Accelerate stencil type we
 lose the comonadic nature of the type. This is a shame because this type
 is both informative to the programmer yet flexible enough that by

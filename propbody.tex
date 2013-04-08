@@ -1,39 +1,36 @@
-
 % Draft #2
 
 
 % Main document
 
-\bibliographystyle{plain}
-
 \section*{Introduction, The Problem To Be Addressed}
 
-In recent years, Moore's law has begun to plateau. As a result the hardware 
-industry has increasingly been turning to MIMD and SIMD architectures as a 
-solution.  Some of the highest performing SIMD implementations today are 
-provided by GPUs and can be harnessed via GPGPU languages such as CUDA and 
-OpenCL.  However, taking advantage of GPGPUs is hard as it requires knowledge 
-of the low-level concepts of these languages. Also, CUDA and OpenCL are not 
+In recent years, Moore's law has begun to plateau. As a result the hardware
+industry has increasingly been turning to MIMD and SIMD architectures as a
+solution.  Some of the highest performing SIMD implementations today are
+provided by GPUs and can be harnessed via GPGPU languages such as CUDA and
+OpenCL.  However, taking advantage of GPGPUs is hard as it requires knowledge
+of the low-level concepts of these languages. Also, CUDA and OpenCL are not
 portable between different hardware and methods of concurrency.
 
-Structured grids are a common computational pattern for scientific parallel 
-computation. They allow us to specify \emph{stencils} or \emph{kernels} which 
-are local computations that compute a new value from neighboring cells.  
-Stencils can be applied to every index such as to make them a computation over 
-the whole array.  Many algorithms can be described in this way including the 
-Gaussian blur filter, edge detection as well as scientific applications such as 
-fluid dynamics. The pattern is also highly parallelizable by splitting the 
+Structured grids are a common computational pattern for scientific parallel
+computation. They allow us to specify \emph{stencils} or \emph{kernels} which
+are local computations that compute a new value from neighboring cells.
+Stencils can be applied to every index such as to make them a computation over
+the whole array.  Many algorithms can be described in this way including the
+Gaussian blur filter, edge detection as well as scientific applications such as
+fluid dynamics. The pattern is also highly parallelizable by splitting the
 array into smaller chunks and running the stencil on each separately.
 
-Ypnos \cite{ypnos} is an Embedded Domain Specific Language in the Haskell 
-programming language that is capable of describing and running these kernels 
-over an array.  It defines a syntax and various primitives for structured grid 
-computation.  
+Ypnos \cite{ypnos-damp10} is an Embedded Domain Specific Language in the Haskell
+programming language that is capable of describing and running these kernels
+over an array.  It defines a syntax and various primitives for structured grid
+computation.
 
-A kernel is described using a modified Haskell function syntax. The following 
-is a kernel used to compute the local average of an array and has a blurring 
-effect.  The arguments are written as an array and the central point is 
-annotated with \verb|@|. It also denotes the location where the kernels return 
+A kernel is described using a modified Haskell function syntax. The following
+is a kernel used to compute the local average of an array and has a blurring
+effect.  The arguments are written as an array and the central point is
+annotated with \verb|@|. It also denotes the location where the kernels return
 value is written in the new array.
 
 \begin{verbatim}
@@ -43,64 +40,64 @@ ave2D (X * Y): | _  t _ | = (t+l+c+r+b)/5.0
                | _  b _ |
 \end{verbatim}
 
-Ypnos has a number of primitive array operations. A \emph{run} primitive is 
-used to turn the stencil into an array operation in the manner specified above.  
-An \emph{iterate} primitive simply recursively applies run.  A \emph{reduce} 
-primitive allows us to summarise the data so that we can calculate means, sums, 
-minimums or maximums.  This result is often used as a stopping condition for 
+Ypnos has a number of primitive array operations. A \emph{run} primitive is
+used to turn the stencil into an array operation in the manner specified above.
+An \emph{iterate} primitive simply recursively applies run.  A \emph{reduce}
+primitive allows us to summarise the data so that we can calculate means, sums,
+minimums or maximums.  This result is often used as a stopping condition for
 iteration.
 
-\emph{zip} and \emph{unzip} primitives allow us to pair and unpair the values 
-of two arrays respectively. This is useful when dealing with multiple 
-inter-related quantities as is the case in a physical system with force, 
+\emph{zip} and \emph{unzip} primitives allow us to pair and unpair the values
+of two arrays respectively. This is useful when dealing with multiple
+inter-related quantities as is the case in a physical system with force,
 acceleration and velocity.
 
-Due to the declarative syntax and its purity, the order of application of the 
-stencils is not important. The author of an Ypnos program does not need to 
-worry about the method of concurrency underpinning their program. This allows 
-the implementers of Ypnos to use whichever method is most appropriate for the 
-given work-load and platform. As many computers these days are equipped with 
-very advanced GPUs capable of general purpose computation, the Ypnos language 
+Due to the declarative syntax and its purity, the order of application of the
+stencils is not important. The author of an Ypnos program does not need to
+worry about the method of concurrency underpinning their program. This allows
+the implementers of Ypnos to use whichever method is most appropriate for the
+given work-load and platform. As many computers these days are equipped with
+very advanced GPUs capable of general purpose computation, the Ypnos language
 should be able to use these to accelerate its calculations.
 
 \section*{Starting Point}
 
 \begin{itemize}
 
-\item I have had experience of functional programming from the course as well 
-as having completed some Haskell tutorials. 
+\item I have had experience of functional programming from the course as well
+as having completed some Haskell tutorials.
 
 \item I have experience of building a compiler from Part IB supervision work.
 
-\item During the course of an 11 week internship I learnt to plan, implement, 
+\item During the course of an 11 week internship I learnt to plan, implement,
 document and test my own project.
 
-\item I have already read the Ypnos paper and am familiar with the constructs 
+\item I have already read the Ypnos paper and am familiar with the constructs
 of the language as well as its primitives.
 
-\item At present Ypnos has been partially implemented in a single threaded 
-fashion on the CPU. This implementation can be taken as both the starting point 
+\item At present Ypnos has been partially implemented in a single threaded
+fashion on the CPU. This implementation can be taken as both the starting point
 and the benchmark for the new implementation.
 
-\item A Haskell ESDL already exists for compiling array computations to CUDA 
-code. The library, `accelerate' \cite{accel}, takes an AST and produces code
-to run on the GPU.  I will use this library as a back-end to avoid writing a 
+\item A Haskell ESDL already exists for compiling array computations to CUDA
+code. The library, `accelerate' \cite{acc-damp11}, takes an AST and produces code
+to run on the GPU.  I will use this library as a back-end to avoid writing a
 compiler to CUDA code directly.
 
 \end{itemize}
 
 \section*{Resources Required}
 
-\begin{itemize} 
+\begin{itemize}
 
-\item For this project I shall require my own laptop computer that runs Arch 
-Linux for the bulk of development work. 
+\item For this project I shall require my own laptop computer that runs Arch
+Linux for the bulk of development work.
 
-\item Backup will be to github, the SRCF and/or the MCS. Should my computer 
+\item Backup will be to github, the SRCF and/or the MCS. Should my computer
 fail I will be able to use the MCS computers for the project.
 
-\item I require an Nvidia GPU in order to test the code produced. This will be 
-provided by Dominic Orchard and I will have access to the machine via SSH for 
+\item I require an Nvidia GPU in order to test the code produced. This will be
+provided by Dominic Orchard and I will have access to the machine via SSH for
 testing purposes.
 
 \end{itemize}
@@ -111,24 +108,24 @@ The project breaks down into the following sub-projects:
 
 \begin{enumerate}
 
-\item Write unit tests that can be used to check the correctness of my 
-implementation. The tests will cover micro aspects of the programming language 
-such as: constants, unary application, binary application, indexing, 
+\item Write unit tests that can be used to check the correctness of my
+implementation. The tests will cover micro aspects of the programming language
+such as: constants, unary application, binary application, indexing,
 conditionals, local let-binding, etc.
 
-\item The implementation of the main compilation. This involves writing a 
-compilation pass that can take the Ypnos AST and produce a correspondent 
+\item The implementation of the main compilation. This involves writing a
+compilation pass that can take the Ypnos AST and produce a correspondent
 `accelerate' AST.
 
-\item The implementation of the basic \emph{run} and \emph{reduce} primitives 
-as well as any combinators for constructing and deconstructing arrays from raw 
+\item The implementation of the basic \emph{run} and \emph{reduce} primitives
+as well as any combinators for constructing and deconstructing arrays from raw
 data. The combinators may be written in the `accelerate' language directly.
 
-\item The testing of the implementation to check that it works correctly and is 
-faster than the original modulo data copying. This will need a test bench to be 
-constructed that includes various well know stencil computations. The test 
-bench will include the following programs as a minimum: the Game of Life, 
-Gaussian blur, Canny edge detection, and (if zip/unzip are implemented) the 
+\item The testing of the implementation to check that it works correctly and is
+faster than the original modulo data copying. This will need a test bench to be
+constructed that includes various well know stencil computations. The test
+bench will include the following programs as a minimum: the Game of Life,
+Gaussian blur, Canny edge detection, and (if zip/unzip are implemented) the
 difference of Gaussians.
 
 \end{enumerate}
@@ -139,94 +136,92 @@ The project will be a success if:
 
 \begin{enumerate}
 
-\item It can compile Ypnos code and implements the \emph{run} primitive on the 
+\item It can compile Ypnos code and implements the \emph{run} primitive on the
 GPU.
 
 \item It implements the \emph{reduce} primitive on the GPU.
 
-\item It scales better than the current single threaded implementation on large 
-work-loads. That is to say that when the input size should correlate with the 
-speed-up observed.  However, this must take into account the time required to 
+\item It scales better than the current single threaded implementation on large
+work-loads. That is to say that when the input size should correlate with the
+speed-up observed.  However, this must take into account the time required to
 copy data on and off the GPU.
 
-\item The translation is correct, preserving the semantics of stencil 
+\item The translation is correct, preserving the semantics of stencil
 computations on the GPU
 
 \end{enumerate}
 
 \section*{Possible Extensions}
 
-If the main aim for this project is achieved then I shall try to implement 
-further primitives of the Ypnos language. The programmer will then be able to 
-take advantage of the speed gains of the GPU pipeline. I will attempt them in 
+If the main aim for this project is achieved then I shall try to implement
+further primitives of the Ypnos language. The programmer will then be able to
+take advantage of the speed gains of the GPU pipeline. I will attempt them in
 this order:
 
 \begin{enumerate}
 
-\item The ``iterate'' primitive. This will eliminate the need to copy data 
+\item The ``iterate'' primitive. This will eliminate the need to copy data
 between the CPU and GPU at each step.
 
 \item The ``zip'' primitive.
 
 \end{enumerate}
 
-I may also attempt to enhance the compiler to decide at run-time whether to use 
-the GPU or CPU dependant on the size of computation required. I will 
-investigate modelling of the GPU execution times in relation to data size and 
+I may also attempt to enhance the compiler to decide at run-time whether to use
+the GPU or CPU dependant on the size of computation required. I will
+investigate modelling of the GPU execution times in relation to data size and
 stencil complexity.
 
 \section*{Timetable: Workplan and Milestones to be achieved.}
 
-Planned starting date is the 19$^{th}$ of October when the proposal is 
+Planned starting date is the 19$^{th}$ of October when the proposal is
 accepted.
 
 \begin{itemize}
 
-\item \textbf{19$^{th}$ of October -- 4$^{th}$ of November} Learn to write and read 
-Haskell code.  Write some programs in Ypnos. Try to understand the existing 
+\item \textbf{19$^{th}$ of October -- 4$^{th}$ of November} Learn to write and read
+Haskell code.  Write some programs in Ypnos. Try to understand the existing
 code base.  Start writing a unit testing suite.
 
-\item \textbf{5$^{th}$ of November -- 18$^{th}$ of November} Finish writing the unit 
-testing suite by including Gaussian blur and Game of Life programs. Get 
-familiar with the `accelerate' ESDL by reading the paper and writing some toy 
-programs. 
+\item \textbf{5$^{th}$ of November -- 18$^{th}$ of November} Finish writing the unit
+testing suite by including Gaussian blur and Game of Life programs. Get
+familiar with the `accelerate' ESDL by reading the paper and writing some toy
+programs.
 
-\item \textbf{19$^{th}$ of November -- 30$^{th}$ of November} Start 
-implementation of the compiler from the Ypnos AST to the `accelerate' AST.  
+\item \textbf{19$^{th}$ of November -- 30$^{th}$ of November} Start
+implementation of the compiler from the Ypnos AST to the `accelerate' AST.
 Most basic operations should translate correctly by this point.
 
-\item \textbf{1$^{st}$ of December -- 16$^{th}$ of December (Christmas)} Finish 
+\item \textbf{1$^{st}$ of December -- 16$^{th}$ of December (Christmas)} Finish
 the compiler and begin work on implementing the run and reduce primitives.
 
-\item \textbf{17$^{th}$ of December -- 6$^{th}$ of January (Christmas)} Course 
+\item \textbf{17$^{th}$ of December -- 6$^{th}$ of January (Christmas)} Course
 revision and Holiday.
 
-\item \textbf{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)} Finish the 
-primitives if necessary.  Write the progress report.  Start work on the basic 
+\item \textbf{7$^{th}$ of January -- 20$^{th}$ of January (Christmas)} Finish the
+primitives if necessary.  Write the progress report.  Start work on the basic
 test bench.
 
-\item \textbf{21$^{th}$ of January -- 3$^{rd}$ of February} Finalise the main 
-test bench and run experiments.  Analyse the performance and scalability of the 
-approach.  Make improvements to the code as necessary to achieve the main aim 
-of the project. 
+\item \textbf{21$^{th}$ of January -- 3$^{rd}$ of February} Finalise the main
+test bench and run experiments.  Analyse the performance and scalability of the
+approach.  Make improvements to the code as necessary to achieve the main aim
+of the project.
 
-\item \textbf{4$^{th}$ of February -- 17$^{th}$ of February} If there is time then 
+\item \textbf{4$^{th}$ of February -- 17$^{th}$ of February} If there is time then
 the main extensions may be implemented at this point.
 
-\item \textbf{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main 
+\item \textbf{18$^{th}$ of February -- 3$^{rd}$ of March} Write the main
 chapters of the dissertation.
 
-\item \textbf{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the 
-existing tests bench and run final experiments.  Complete most of dissertation 
+\item \textbf{4$^{th}$ of March -- 15$^{th}$ of March} Elaborate on the
+existing tests bench and run final experiments.  Complete most of dissertation
 in draft form.
 
-\item \textbf{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} Finish 
+\item \textbf{16$^{th}$ of March -- 22$^{nd}$ of April (Easter)} Finish
 dissertation. The rest of the vacation is set aside for course revision.
 
-\item \textbf{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed 
-and sent to my supervisor and director of studies by the \textbf{23$^{rd}$ of 
-April}.  This will be followed by proof reading and then an early submission. 
+\item \textbf{23$^{th}$ of April -- 5$^{th}$ of May} A draft must be completed
+and sent to my supervisor and director of studies by the \textbf{23$^{rd}$ of
+April}.  This will be followed by proof reading and then an early submission.
 
 \end{itemize}
-
-\bibliography{refs}

@@ -4,7 +4,7 @@
 # Note that continuation lines require '\'
 # and that TAB is used after ':' and before unix commands.
 
-DISS = diss.latex refs.bib
+DISS = diss.tex propbody.tex refs.bib diss.sum frontmatter.tex appendix.tex
 
 pandoc = /home/sam/.cabal/bin/pandoc
 
@@ -30,18 +30,21 @@ proposal.pdf:	$(PROP)
 	pdflatex proposal
 
 diss.pdf:	$(DISS)
-	pdflatex diss.latex
+	pdflatex diss.tex
 	biber diss
-	pdflatex diss.latex
+	pdflatex diss.tex
 
 diss:		diss.pdf
 	evince diss.pdf &
 
-wc:	diss.latex
-	texcount -brief diss.latex
+diss.sum: diss.tex
+	texcount -1 -sum diss.tex > diss.sum
+
+wc:	diss.sum
+	cat diss.sum
 
 #diss.latex:	$(DISS)
-#	$(pandoc) diss.md -o diss.latex $(pandoc_opts)
+#	$(pandoc) diss.md -o diss.tex $(pandoc_opts)
 
 clean:
 	rm -f diss.ps *.dvi *.aux *.log *.err

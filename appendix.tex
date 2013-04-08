@@ -1,0 +1,187 @@
+\chapter{Original Proposal}
+\label{chap:prop}
+
+\input{propbody.tex}
+
+\chapter{Full Cognitive Dimension Analysis}
+\label{chap:cogdim}
+
+\newcommand{\sideways}[1]{
+  \parbox[t]{2mm}{{\rotatebox[origin=r]{90}{#1}}}}
+\newlength{\fstcollen}
+\newlength{\sndcollen}
+\setlength{\fstcollen}{0.5cm}
+\setlength{\sndcollen}{(\textwidth-\fstcollen-2cm)/4}
+\begin{longtable}{r | p{\sndcollen} p{\sndcollen} p{\sndcollen} p{\sndcollen}}
+\hline\noalign{\medskip}
+
+\sideways{CD}
+ &
+Accelerate
+ &
+Non-unifying
+ &
+Data families
+ &
+Type families (only stencil data type)
+
+\\\noalign{\medskip}
+\hline\noalign{\medskip}
+
+\sideways{Repetition viscosity}
+ &
+\textbf{Worst}
+
+Clearly here we have a very high viscosity: each function must be re-written in terms of new syntax and run in different ways.
+ &
+We have improved the viscosity significantly. The user must only
+implement their stencils in one language but they must still change all
+the imports and correct type errors.
+ &
+Data families worsen the viscosity over the import method as we must now
+change all the data constructors as opposed to the imports. In real code
+there will be more of these than import locations.
+ &
+\textbf{Best}
+
+Here we have the least repetition viscosity of all the approaches. We
+now only need to change the quasi quoter to change the whole
+implementation.
+
+\\\noalign{\medskip}
+
+\sideways{Imposed lookahead}
+ &
+\textbf{Worst}
+
+The user must know ahead of time that they will be writing in two
+languages to be sure to minimize duplication of code and structure their
+program correctly.
+ &
+\textbf{Best}
+
+There is practially no imposed lookahead as we can simply swap out the
+implementation by importing from different places.
+ &
+\textbf{Best}
+
+We do not have imposed lookahead as we can easily swap the constructors.
+ &
+\textbf{Best}
+
+There is little imposed lookahead in theory, though some operations are
+currently not supported in the GPU implementation. (TODO: link to more)
+Some types may not be supported easily in both implementations so this
+should be considered too.
+
+\\\noalign{\medskip}
+
+\sideways{Consistency}
+ &
+\textbf{Worst}
+
+The syntaxes are different and so are fairly inconsistent. There are,
+however, some similarities between the two in their stencil
+representation.
+ &
+Consistency is improved as the syntax is now uniform but types are not
+uniform.
+ &
+The syntax and usage is the same except for changing the constructors
+which is inconsistent.
+ &
+\textbf{Best}
+
+We have eliminated the inconsistency in usage of the data families. Now
+the approach is almost entirely consistent except for the types.
+
+\\\noalign{\medskip}
+
+\sideways{Terseness}
+ &
+\textbf{Worst}
+
+A lot of code is written by the user to cope with the two different
+implementations.
+ &
+Changing requires a fair bit of code to be changed as we may be
+importing many different things from the Ypnos libraries and all these
+things must be changed.
+ &
+We require a lot of code to express the swap from CPU to GPU.
+ &
+\textbf{Best}
+
+The syntax for switching is minimally terse.
+
+\\\noalign{\medskip}
+
+\sideways{Hidden dependencies}
+ &
+\textbf{Best}
+
+No hidden dependencies. It is very clear and explicit what is going on.
+ &
+\textbf{Worst}
+
+Many hidden dependencies are introduced as the types of the different
+imported functions do not necessarily match. This can cause failures in
+many different places on changing the import.
+ &
+\textbf{Best}
+
+Here the dependencies introduced in the type system by the import
+approach have been made explicit by data constructors.
+ &
+\textbf{Worst}
+
+More hidden dependencies are introduced. Types change without the users knowing
+due to different type and constraint families. This might affect some programs.
+
+\\\noalign{\medskip}
+
+\sideways{Abstraction gradient}
+ &
+\textbf{Best}
+
+The abstraction is at its most basic level -- choosing between Ypnos or
+Accelerate. The user must get to grips with these abstractions as a
+minimum.
+ &
+The abstraction level is fairly low as it uses only simple Haskell
+constructs.
+ &
+The user must now be familiar with the idea of an associated data family
+and GADT which are quite advanced Haskell type features.
+ &
+
+The abstraction here is perhaps highest of all as it uses the most
+advanced type features.
+
+\\\noalign{\medskip}
+
+\sideways{Closeness of mapping}
+ &
+\textbf{Best}
+
+This way we preserve the comonadic nature of the operations in the type
+so that it is obvious to the user what is going on.
+ &
+\textbf{Worst}
+
+The comonadicity is lost due to having to change the types to suit the
+accelerate implementation.
+ &
+\textbf{Worst}
+
+The comonadicity is lost also.
+ &
+\textbf{Worst}
+
+The comonadicity is lost.
+
+\\\noalign{\medskip}
+\hline
+\noalign{\medskip}
+\caption{Comparison of the different API using cognitive dimensions. \label{tbl:cogcomp}}
+\end{longtable}

@@ -1,6 +1,6 @@
 %\documentclass[paper=6in:9in,DIV=calc,12pt,oneside]{scrbook}
-\documentclass[12pt,a4paper,oneside]{scrbook}
-%\documentclass[12pt,a4paper,twoside]{scrbook}
+%\documentclass[12pt,a4paper,oneside]{scrbook}
+\documentclass[12pt,a4paper,twoside]{scrbook}
 \usepackage{lmodern}
 \usepackage{calc}
 \usepackage{listings}
@@ -93,96 +93,94 @@
 \chapter{Introduction}
 
 In this project I created a compiler for the Ypnos programming language that
-targets modern GPU allowing for massive speed-ups of programs in this
+targets modern GPUs (Graphical Processing Units) allowing for massive speed-ups of programs in this
 language. The language allows programmers to use a very concise syntax to
 describe certain types of parallel grid operations. Using this syntax it is now
-possible to target machines both with and without compatible GPU.
+possible to target machines both with and without compatible GPUs.
 
 \section{Motivation}
 
-GPU have always been excellent exploiters of SIMD parallelism for graphics
+GPUs have always been excellent exploiters of SIMD parallelism for graphics
 applications. In recent years, however, the GPU pipeline has become more general
 than ever. Beyond just providing programmable shaders\footnote{A shader is a
   small program used in graphics applications for simulating lighting effects on
-  scenes and objects.} this platform has been opened up to more general purpose
-usage, such as video codec acceleration and even scientific computing. The
-ubiquity and low cost of this hardware opens up an opportunity for researchers,
-professionals and hobbyists alike.
+  scenes and objects.} the platform has been opened up, allowing general
+programming of GPUs, such as video codec acceleration and even scientific
+computing. The ubiquity and low cost of this hardware opens up an opportunity
+for researchers, professionals and hobbyists alike.
 
-The one hurdle to unlocking this increased computation power is the programming
-models enforced by the API. The API of such general purpose GPU (GPGPU) tends to
-be low level but at the same time restricted in ways that may be unfamiliar to
-the user. Particularly, memory access within a thread is hugely limited to allow
-effective parallelism. This requires the users of these API to undergo a steep
-learning curve to achieve such speed-ups.
+The programming model enforced by the APIs of a GPU can be a significant hurdle
+to programming. The APIs of such general purpose GPU (GPGPU) tends to be
+low-level but at the same time restricted in ways that may be unfamiliar to the
+user. Particularly, memory access within a thread is limited to allow effective
+parallelism. This requires API users to undergo a steep learning curve to
+achieve such speed-ups.
 
 An alternative to using these lowest level API is higher level computational
-paradigms which are able to expose the SIMD parallelism of a program. Often
-these paradigms are not as powerful as the underlying API, but allow for very
-concise programs within a certain field of interest. For example, in video
-editing we are interested in fast decoding and so a GPU accelerated decoding
-library would enable us to easily take advantage of GPU speed-ups without
-writing the low-level code. In the field of scientific computing many operations
-can be described in terms of matrix operations, so a matrix manipulation library
-could expose the SIMD parallelism needed.
+paradigms which expose the SIMD parallelism of a program. Often these paradigms
+are not as powerful as the underlying APIs, but allow for very concise programs
+within a certain field of interest. For example, in video editing we are
+interested in fast decoding and so a GPU accelerated decoding library would
+enable us to easily take advantage of GPU speed-ups without writing the
+low-level code. In the field of scientific computing many operations can be
+described in terms of matrix operations, so a matrix manipulation library could
+expose the SIMD parallelism needed.
 
 The approach taken in the Ypnos programming language is to target a type of
 computation common to graphics algorithms and certain scientific simulation. By
 taking a simple and easy to learn paradigm and combining it with a declarative
 API, Ypnos is able to exploit as much SIMD parallelism as needed under the
-surface. Furthermore, Ypnos is back-end agnostic, meaning that a program written
-in it can easily be transported from a GPU to a multi-core CPU.
+surface. Furthermore, Ypnos is back-end agnostic, meaning its programs can
+easily be transported from a GPU to a multi-core CPU.
 
-As of yet, the Ypnos implementation is CPU only. This is where my project comes
-in: to implement a GPU backend for the Ypnos language.
+Prior to this project, Ypnos supported only CPU execution; this project
+implements a GPU backend.
 
 \section{Related work}
 
-Unlike some project, I have not begun from scratch. A language and syntax
-already existed in the form of Ypnos. Also, a GPU computation library called
-Accelerate was already available in Haskell. I will briefly introduce the reader to
-both, giving a grounding for the work to come.
+Ypnos was originally proposed by Orchard et al.\cite{ypnos-damp10}, as a
+language embedded within Haskell with a CPU prototype. Haskell supports GPU
+computation via the Accelerate library~\cite{acc-damp11}. I will briefly
+introduce the reader to both, giving a grounding for the work to come.
 
 \subsection{Ypnos}
 
 \emph{Stencil computations} are an idiom used in parallel programming.  They
-work by defining a \emph{kernel} (or \emph{stencil}) which is applied to each
-element of an array of data (which I will call a \emph{grid}). The kernel
-computes a new value for an array location using its old value and the old
-values of its neighboring cells. In summary, the opperation is similar to
-convolution.
+comprise a \emph{kernel} (or \emph{stencil}) which is applied to each element of
+an array\footnote{In Ypnos, arrays are known as \emph{grids} to abstract from
+  the implementation details} of data. The kernel computes a new value for an
+array location using its old value and the old values of its neighbouring
+cells. Convolutions are a well-known example of stencil computation. The
+Gaussian blur is an example of a convolution operation which can be
+implemented with stencils.
 
-The idiom is particularly useful in the fields of graphical processing, where
-some typical applications include Gaussian blur, Laplacian of Gaussian, Canny
-edge detection and many other filter based methods.  Stencils can also be used
-for computer approximations of differential systems of equations. As such, they
-are useful in the simulation of physical systems via fluid, stress or heat
+The idiom is particularly useful in the fields of graphical processing and
+scientific computing, where some typical applications include Gaussian blur,
+Laplacian of Gaussian (an example of differential equation approximation), Canny
+edge detection and many other filter based methods. In the scientific domain,
+they are used in the simulation of physical systems via fluid, stress or heat
 dynamics.
 
-Ypnos~\cite{ypnos-damp10, ypnos-dsl11} is an \emph{embedded domain specific
-  language} (EDSL) for stencil computations. Therefore, it is not a language in
-its own right, but rather is embedded within the Haskell programming
-language. This allows Ypnos to share much of the syntax and implementation of
-its host language. Haskell is a particularly good fit for stencil computations
-as its purity allows the programmer to write parallel programs without worrying
-about the interaction and sharing of state.
+Ypnos is an \emph{embedded domain specific language} (EDSL) for stencil
+computations embedded within the Haskell programming
+language~\cite{ypnos-damp10, ypnos-dsl11}. This allows Ypnos to share much of
+the syntax and implementation of its host language. Haskell is a particularly
+good fit for stencil computations as its purity allows the programmer to write
+parallel programs without worrying about the interaction and sharing of state.
 
 \subsection{Accelerate}
 
 \emph{Accelerate}~\cite{acc-damp11} is also an EDSL for the Haskell language.
-It implements parallel array computations on the GPU. Modern GPU provide vast
-amounts of SIMD parallelism via general purpose interfaces (GPGPU). However, for
-most users these are hard to use, as the interfaces are very low level and
-require the user to put a lot of effort into writing correct parallel programs.
+It implements parallel array computations on the GPU. Modern GPUs provide vast
+amounts of SIMD parallelism via general purpose interfaces (GPGPU). Accelerate
+uses matrix operations, which are easier for a programmer to understand, to
+expose SIMD parallelism to the GPU.
 
-Matrices are a mathematical model which embodies SIMD parallelism. They are
-operators over large amounts of data. It is possible to express many parallel
-calculations and operations as matrix equations.
-
-The primary target GPU of Accelerate are those which support NVIDIA's CUDA
-extension for GPGPU programming. The library uses algorithm skeletons for online
-CUDA code generation. It provides operations such as \texttt{map}, \texttt{zip}
-and \texttt{fold} and implements its own stencil convolution function.
+The primary target GPUs of Accelerate are those which support NVIDIA's CUDA
+extension for GPGPU programming. The library uses algorithmic skeletons for
+online CUDA code generation~\cite{cole1989}. It provides operations such as
+\texttt{map}, \texttt{zip} and \texttt{fold} and implements its own stencil
+convolution function.
 
 
 \chapter{Preparation}
@@ -323,7 +321,7 @@ for my needs. In fact, it already includes some functions for performing stencil
 computations over grids.
 
 I chose Accelerate because of the native Haskell support and stencil
-operations. It allowed me to abstract away from compiling to low level C code
+operations. It allowed me to abstract away from compiling to low-level C code
 and, instead, concentrate on translating to a more abstract and general API.
 
 \subsubsection{CUDA}
@@ -1385,7 +1383,7 @@ sum xs (x,y) =  reduceG (mkReducer (+) (+) 0 id) arr
     where arr = fromList (Z :. x :. y) (cycle xs)
 
 -- Run a floating point stencil of any type
-runF sten xs (x, y) = gridData \$(TODO: remove from final) (runG sten xs')
+runF sten xs (x, y) = gridData (runG sten xs')
     where xs' = listGrid (Dim X :* Dim Y)
                          (0, 0) (x, y)
                          (cycle xs)
@@ -1551,7 +1549,7 @@ functions include:
 
 The results of the benchmarking showed that the GPU implementation outperforms
 the CPU for grids of width greater than 30. This is in accordance with the
-expected outcome, that GPU is able to perform better modulo copy on/off times.
+expected outcome, that the GPU is able to perform better modulo copy on/off times.
 
 On a scale of 0-100 (see Figure~\ref{fig:runperf100}), the slowdown of the GPU
 is barely visible above random variation. However, on a greater scale
@@ -1713,13 +1711,6 @@ The same procedure is used for the reduce primitive. We use a one-dimensional
 grid for this case as the built-in Haskell function we are comparing against is
 one-dimensional. The resulting reduced values are compared and a failure is
 registered if they should differ.
-
-\begin{hflisting}[caption={The write, compile, test, commit cycle used throughout
-  development of this project}.]
-write  --->  compile   --->   test   --->   commit
-code             |              |              |
-  ^--------------+--------------+--------------+
-\end{hflisting}
 
 For the large part of the project I have been coding tests and
 implementation in parallel (also known as Test Driven Development or

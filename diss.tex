@@ -1,6 +1,7 @@
 %\documentclass[paper=6in:9in,DIV=calc,12pt,oneside]{scrbook}
 %\documentclass[12pt,a4paper,oneside]{scrbook}
 \documentclass[12pt,a4paper,twoside]{scrbook}
+\usepackage[svgnames]{xcolor}
 \usepackage{calc}
 \usepackage{listings}
 \usepackage{amssymb,amsmath}
@@ -8,6 +9,7 @@
 \usepackage{longtable}
 \usepackage{caption}
 \usepackage{wrapfig}
+\usepackage{subcaption}
 \usepackage{titling}
 \usepackage{pifont}
 \usepackage{todonotes}
@@ -35,7 +37,6 @@
 %\setcounter{secnumdepth}{0}
 
 %Define block quotes
-\usepackage[svgnames]{xcolor}
 \usepackage[utf8]{inputenc}
 
 \usepackage{libertine} % or any other font package (or none)
@@ -66,6 +67,10 @@
 \newenvironment{shadequote}%
 {\begin{snugshade}\begin{quote}\openquote}
 {\hfill\closequote\end{quote}\end{snugshade}}
+
+%TC:group hflisting 0 0
+%TC:group tabular 1 1
+%TC:group table 0 1
 
 \lstnewenvironment{hflisting}[1][]
   {\lstset{language=Haskell,float=tb,captionpos=b,breaklines=true,#1}}% \begin{javalisting}[...]
@@ -458,9 +463,8 @@ in the language and implementation.
 
 The core Ypnos data type is the \emph{grid} which is a generalisation of an
 array. Ypnos is designed with higher dimensions in mind so the grid may be of
-many dimensionalities (1D, 2D, 3D, etc.).
-
-\subsection{The Stencil Pattern} \todo{Explain parallelism}
+many dimensionalities (1D, 2D, 3D, etc.). \todo{Explain parallelism due to
+  stencils?}
 
 \subsection{Syntax}
 
@@ -613,16 +617,14 @@ array computations.
 
 \begin{wrapfigure}{O}{0.5\textwidth}
   \includegraphics[width=0.5\textwidth]{figs/copyonoff.pdf}
-  \caption{An illustration of copy-on and copy-off times. \todo{make show in
-      right place} }
+  \caption{An illustration of copy-on and copy-off times.  }
   \label{fig:copyonoff}
 \end{wrapfigure}
-
 In order for a process on the CPU to execute a CUDA program it must first send
 the program and the data to the GPU. When the result is ready it must be copied
 back into the main memory of the process concerned. I will call these two
 procedure \emph{copy-on} and \emph{copy-off} respectively (see
-Figure~\ref{fig:copyonoff}).
+Figure~\ref{fig:copyonoff})\todo{make show in right place}.  .
 
 Accelerate chose to represent this difference in the type system. The
 \texttt{Acc} type denotes an operation on the GPU. For the purposes of
@@ -659,7 +661,7 @@ collective operations and the latter represents scalar computations. The two
 types correspond to the two different types of AST built: one for scalar and the
 other for array operations.
 
-The map function is depicted in Listing~\ref{lst:map}.
+The map function is depicted in Listing~\ref{lst:map}.\todo{compare run and map? Comonads?}
 
 \begin{hflisting}[label={lst:map}, caption=The type of the \texttt{map}
   operation as defined by Accelerate.]
@@ -687,8 +689,6 @@ Whilst map for an array applies a scalar function to every element in an array,
 Accelerate provides support for stencil computations via the \texttt{stencil}
 function (see Listing~\ref{lst:sten}).
 
-\todo{compare run and map? Comonads?}
-
 \begin{hflisting}[label={lst:sten}, caption={The type of the stencil application
   function in Accelerate. I have also included an example instance of the
   \texttt{Stencil} type class. Many others are also possible.}]
@@ -714,8 +714,20 @@ specified. One of the types allowed is \texttt{Mirror} which deals with an out
 of bounds access by picking the nearest coordinate from within the array.
 
 With these two parameters we have defined an operation which performs the
-stencil convolution.
+stencil convolution. An example stencil function is given in
+Listing~\ref{lst:ypsten}.
 
+\begin{hflisting}[label={lst:ypsten}, caption=The ``average'' stencil defined
+  using Accelerate's syntax.]
+avg :: Exp a => Stencil3x3 a -> Exp a
+avg (( _, a, _ )
+    ,( b, c, d )
+    ,( _, e, _ )) = (a + b + c + d + e) / 5
+
+type Stencil3x3 = ((Exp a, Exp a, Exp a)
+                  ,(Exp a, Exp a, Exp a)
+                  ,(Exp a, Exp a, Exp a))
+\end{hflisting}
 
 \section{Summary}
 
@@ -749,6 +761,30 @@ Section~\ref{sec:iterdev}) and prototyped a number of different possible
 solutions. In this chapter I will highlight the major implementation approaches
 taken in both cases as well as an example usage of the system.
 
+\section{Iterative Development}
+
+The iterative development approach was followed throughout the implmentation of
+this project. Table~\ref{tbl:iter} describes the phases of development: each
+phase consisted of a working code prototype and a small usability evaluation. In
+the following sections I will describe each approach taken in more detail.
+
+\begin{table}
+\begin{tabular}{l l | p{10cm}}
+  Phase 1 & Motivation & Create a working translation and run primitive using Accelerate.\\
+  & Produced & The non-unifying approach to primitives and type system approach to stencil translation with centring (Section~\ref{sec:non-unify-appr}).
+  \\
+  Phase 2 & Motivation & Reduce the code changes the programmer must perform and unify the CPU and GPU run primitives.\\
+  & Produced & The run and reduce primitives using type class parameters (Listing~\ref{lst:redgrid})
+  \\
+  Phase 3 & Motivation & Make the return type of the reducer more useful to the user.\\
+  & Produced & The run and reduce primitives using data families (Listing~\ref{lst:rundatafam}).
+  \\
+  Phase 4 & Motivation & Remove the need for the programmer to change many constructors when switching.\\
+  & Produced & The final approach using a combination of type synonym families and type class parameters (Section~\ref{sec:final}).
+\end{tabular}
+\caption{The phase of iterative development in this project: for each cycle the motivation and work produced is described. \label{tbl:iter}}
+\end{table}
+
 \section{Stencil Compilation}
 
 Compilation of stencils was a central task in this project. The abstract Ypnos
@@ -758,20 +794,6 @@ custom syntax to Haskell AST. Accelerate's implementation has overridden much of
 the Haskell operators required for this translation stage, so the bulk of the
 effort went into producing the functions that contained the computation. These
 functions take the form of Listing~\ref{lst:ypsten}
-
-\todo{put in chapter 2?}
-
-\begin{hflisting}[label={lst:ypsten}, caption=The ``average'' stencil defined
-  using Accelerate's syntax.]
-avg :: Exp a => Stencil3x3 a -> Exp a
-avg (( _, a, _ )
-    ,( b, c, d )
-    ,( _, e, _ )) = (a + b + c + d + e) / 5
-
-type Stencil3x3 = ((Exp a, Exp a, Exp a)
-                  ,(Exp a, Exp a, Exp a)
-                  ,(Exp a, Exp a, Exp a))
-\end{hflisting}
 
 The arguments are formed as tuples of tuples. The rest of the stencil is normal
 Haskell code. However, the return type, \texttt{Exp a}, insures that all the
@@ -822,13 +844,25 @@ This is, illustrated by example. Assume a one dimensional stencil with the
 cursor at an off-centre location (denoted by \texttt{c}) --
 Figure~\ref{fig:cursor}.
 
-\begin{figure}[tb]
+\begin{figure}
   \centering
-  \includegraphics[width=0.5\textwidth]{figs/align1.pdf}
+  \begin{subfigure}[t]{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figs/align1.pdf}
+    \caption{The stencil before centring. Note the even shape ($4\times0$).}
+    \label{fig:cursor}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figs/align2.pdf}
+    \caption{The same stencil after centring. Note the shape is now odd
+      ($5\times0$)}
+    \label{fig:centredcursor}
+  \end{subfigure}
   \caption{Where $a$ is the position of the cursor and $b$ -- the length of the
-    stencil.}
-  \label{fig:cursor}
-\end{figure}
+    stencil.  In this diagram $pad_{start}$ represents the offset which needs to
+    be applied to the centre, i.e the amount to pad the start of the grid. By
+    contrast, $pad_{end}$ represents the amount to pad the end of the grid. }
+\end{figure}\todo{change coff->padstart roff->padend}
 
 Now we must determine the padding such that the cursor is centred. This is given
 by the following two equations:
@@ -838,16 +872,6 @@ by the following two equations:
 \[ pad_{end} = max \{a, b-a-1\} - (b - a - 1) \]
 
 This means that after centring we get Figure~\ref{fig:centredcursor}
-
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.5\textwidth]{figs/align2.pdf}
-  \caption{In this diagram \emph{coffset} represents the offset which needs to
-    be applied to the centre, i.e the amount to pad the start of the grid. By
-    contrast, \emph{roffset} represents the amount to pad the end of the
-    grid. \todo{make subfigure and change coff->padstart roff->padend}}
-  \label{fig:centredcursor}
-\end{figure}
 
 In order to implement the centring I had to consider both the one and two
 dimensional cases.  It would be quite easy to deal with this in two separate
@@ -1462,25 +1486,6 @@ runAvgCPU = runF (CPUArr avgY)
 
 \section{Summary}
 
-The iterative development approach was followed throughout the implmentation of this project. Table~\ref{tbl:iter} describes the phases of development.
-
-\begin{table}
-\begin{tabular}{l l | p{10cm}}
-  Phase 1 & Motivation & Create a working translation and run primitive using Accelerate.\\
-  & Produced & The non-unifying approach to primitives and type system approach to stencil translation with centring (Section~\ref{sec:non-unify-appr}).
-  \\
-  Phase 2 & Motivation & Reduce the code changes the programmer must perform and unify the CPU and GPU run primitives.\\
-  & Produced & The run and reduce primitives using type class parameters (Listing~\ref{lst:redgrid})
-  \\
-  Phase 3 & Motivation & Make the return type of the reducer more useful to the user.\\
-  & Produced & The run and reduce primitives using data families (Listing~\ref{lst:rundatafam}).
-  \\
-  Phase 4 & Motivation & Remove the need for the programmer to change many constructors when switching.\\
-  & Produced & The final approach using a combination of type synonym families and type class parameters (Section~\ref{sec:final}).
-\end{tabular}
-\caption{The phase of iterative development in this project: for each cycle the motivation and work produced is described. \label{tbl:iter}}
-\end{table}
-
 In this chapter we have seen how stencil compilation and the primitives (reduce
 and run) were implemented. We saw how stencil compilation was attempted in a
 compile-time and run-time fashion and how centring was implemented. We also saw
@@ -1607,9 +1612,9 @@ functions include:
     that both the Game of Life and average function diverge from the base
     measurement. Game of Life degrades the worst due to function calling
     overheads in its implementation. The CPU is not depicted as it grows too
-    quickly, dwarfing the GPU measurements. \todo{colour under copy-on/off}}
+    quickly, dwarfing the GPU measurements. }
   \label{fig:runperf1000}
-\end{figure}
+\end{figure}\todo{colour under copy-on/off}
 
 \begin{figure}[h]
   \includegraphics[width=\textwidth]{figs/run_performance3.pdf}
@@ -1910,21 +1915,21 @@ The cognitive dimensions relevant to this task are:
 
 The various approaches to provide an API to the programmer were discussed in the
 implementation section (\ref{sec:impl}). They essentially boiled down to the
-following three approaches \todo{each more with examples or reference}:
-choosing the different implementation based on importing (also called the
-non-unifying approach, see Section~\ref{sec:non-unify-appr}), using type classes
-with associated data families (Section~\ref{sec:assoc-data-fam}) and using type
-classes with associated type families (Sections~\ref{sec:assoctypefam} and
-\ref{sec:final}) For the sake of comparison I will also include the approach of
-the programmer re-coding their implementation in Accelerate for the GPU.
+following three approaches\todo{Enough just to have references without
+  examples?}: choosing the different implementation based on importing (also
+called the non-unifying approach, see Section~\ref{sec:non-unify-appr}), using
+type classes with associated data families (Section~\ref{sec:assoc-data-fam})
+and using type classes with associated type families
+(Sections~\ref{sec:assoctypefam} and \ref{sec:final}) For the sake of comparison
+I will also include the approach of the programmer re-coding their
+implementation in Accelerate for the GPU.
 
-The results of the evaluation are briefly summarized in
+The results of the evaluation are briefly summarised in
 Table~\ref{tbl:cogcompbrief}, for a full discussion see Table~\ref{tbl:cogcomp}
-in the Appendix.
+in the Appendix. An informal usability analysis such as this one was performed
+at the end of each iterative development phase in order to inform the next
+prototype.
 
-\newlength{\fstcollen} \newlength{\sndcollen}
-\setlength{\fstcollen}{0.5cm}
-\setlength{\sndcollen}{(\textwidth-\fstcollen-2cm)/4}
 \begin{longtable}{r | l l l l}
 \hline
 
@@ -1962,8 +1967,6 @@ Closeness of mapping & \textbf{Best} & \textbf{Worst} & \textbf{Worst} &
 \end{longtable}
 
 \subsection{Conclusions}
-
-\todo{mention iterative}
 
 As we now can see, the best approach for our users is that of associated type
 families with the data constructor for the stencil function. This approach is

@@ -6,3 +6,21 @@
 *.pdf
 *.ps
 
+/_region_.tex
+/auto/diss.el
+/diss.bcf
+/diss.fdb_latexmk
+/diss.fls
+/diss.latex
+/diss.out
+/diss.pdf.xoj
+/diss.run.xml
+/diss.synctex.gz
+/diss.tdo
+/diss.tex.backup
+/diss.toc
+/makefile.txt
+/prog.lyx~
+/template.latex
+/test
+/title.tex

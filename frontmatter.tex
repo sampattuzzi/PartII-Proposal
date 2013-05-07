@@ -1,21 +1,16 @@
 \chapter{Proforma}
 
 {\large
-\begin{tabular}{ll}
-Name:               & \bf Samuel Pattuzzi                                 \\
-College:            & \bf Robinson College                                \\
-Project Title:      & \bf \thetitle \\
-Examination:        & \bf Part II Project, June 2013                      \\
-Word Count:         & \bf \wordcount\footnotemark[1]                      \\
-Project Originator: & D.A. Orchard                                        \\
-Supervisor:         & D.A. Orchard                                        \\
+\begin{tabular}{p{0.3\textwidth} p{0.7\textwidth}}
+  Name:               & \bf Samuel Pattuzzi                                 \\
+  College:            & \bf Robinson College                                \\
+  Project Title:      & \bf \thetitle \\
+  Examination:        & \bf Part II Project, June 2013                      \\
+  Word Count:         & \bf \wordcount                                      \\
+  Project Originator: & D.A. Orchard                                        \\
+  Supervisor:         & D.A. Orchard                                        \\
 \end{tabular}
 }
-
-\footnotetext[1]{This word count was computed by \texttt{texcount}.}
-
-\stepcounter{footnote}
-
 
 \section*{Original Aims of the Project}
 
@@ -28,11 +23,15 @@ implementation.
 
 \section*{Work Completed}
 
-All that has been completed appears in this dissertation.
+The criteria set out in the proposal were met. A backend consisting of a
+compilation stage and two primitives was implemented. The correctness of the
+implementation was checked by unit testing and benchmarks showed that the
+performance of the GPU backend exceeded that of the CPU. In addition, a
+usability analysis of the library was performed.
 
 \section*{Special Difficulties}
 
-No special difficulties were encountered.
+None.
 
 \newpage
 \section*{Declaration}
@@ -42,6 +41,9 @@ Computer Science Tripos, hereby declare that this dissertation and the work
 described in it are my own work, unaided except as may be specified below, and
 that the dissertation does not contain material that has already been used to
 any substantial extent for a comparable purpose.
+
+I give permission for my dissertation to be made available in the archive
+area of the Laboratory's website.
 
 \begin{tabbing}
 \bigskip \\
@@ -56,3 +58,4 @@ Date \> \thedate \\
 \setcounter{tocdepth}{2}
 \tableofcontents
 }
+\cleardoublepage

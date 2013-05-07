@@ -457,19 +457,9 @@ implementation I was simultaneously writing unit tests for the code.  The
 approach allowed me to quickly and effectively find bugs which had not already
 been found by the Haskell type system.
 
-\emph{QuickCheck} is a Haskell unit testing library\cite{claessen2011}. In most
-unit testing libraries for other platforms the programmer has to provide sets of
-test data for the library to check against the program.  The code for generating
-this data is left to the programmer. QuickCheck takes a different approach:
-instead of specifying testing functions, which include the test generation, the
-programmer specify properties which take the data to be tested as an
-argument. The generation of this data is done by the library.
-
-QuickCheck is able to generate random testing data for most built-in Haskell
-data types. For user defined types, the programmer must provide an instance of
-the class \texttt{Arbitrary} which allows QuickCheck to generate random samples
-for testing.
-
+\emph{QuickCheck} is the Haskell unit testing library\cite{claessen2011} used
+throughout this project. QuickCheck and the testing methodology are discussed in
+more detail in \autoref{sec:correctness}.
 
 \section{Introduction to Ypnos}
 \label{sec:introduction-ypnos}
@@ -478,7 +468,6 @@ Ypnos is an existing language with a fully formed syntax and a partial reference
 implementation. Before I could start coding the translation from Ypnos to GPU, I
 first had to understand and appreciate the reasoning behind the current choices
 in the language and implementation.
-\todo{Make Ypnos prims a subset of Haskell Code.}
 \begin{figure}[!h]
 \centering
 % Define block styles
@@ -513,9 +502,13 @@ in the language and implementation.
     \node [bin] (bin) {Binary};\\
   };
   \begin{pgfonlayer}{background}
-    \node [surround] (background1) [fit = (title1) (libs)] {};
-    \node [surround] (background2) [fit = (title2) (libs2)] {};
+    \node [surround] (hasprim1) [fit = (haskell1) (libs)] {};
+    \node [surround] (hasprim2) [fit = (haskell2) (libs2)] {};
+    \node [surround] (background1) [fit = (title1) (hasprim1)] {};
+    \node [surround] (background2) [fit = (title2) (hasprim2)] {};
     \node [surround] (background3) [fit = (title3) (bin)] {};
+    \node [haskell] (hasprim1) [fit = (haskell1) (libs)] {};
+    \node [haskell] (hasprim2) [fit = (haskell2) (libs2)] {};
   \end{pgfonlayer}
   % Draw edges
   \path [line] (background1) --
@@ -538,7 +531,7 @@ Section~\ref{sec:ypnos}, the grid is Ypnos' generalisation of the array. Unlike
 the array, an Ypnos grid is implementation agnostic and could be implemented
 differently with different backends.
 
-Ypnos is designed with higher dimensions in mind so the grid may be of
+Ypnos is designed with higher dimensions in mind so the grid may be
 multi-dimensional (1D, 2D, etc.). In theory, the variable dimensionality of the
 grids allows Ypnos stencil operations to be n-dimensional (although the
 implementation doesn't currently support this).
@@ -546,15 +539,15 @@ implementation doesn't currently support this).
 \subsection{Parallelisation}
 
 The stencil as a pattern is particularly good at exposing SIMD parallelism. On
-systems like GPUs the amount of coherent data sharing allowed is
-minimal\footnote{Basic guarantees are given but most of the work is left to the
-  programmer.}\todo{Expand?}, which means that operations on the different cores
-must be highly data parallel.
+systems like GPUs the amount of data sharing allowed is
+restricted\footnote{Access to global shared memory (between thread blocks) is
+  expensive. Instead thread block local memory should be used.}, which means
+that operations on the different cores must be highly data parallel.
 
-Via a process called \emph{decomposition} we are able to split a large grid into
-many subgrids (see Figure~\ref{fig:sten-decomp}). The stencils can operate over
-their subgrids in parallel because the write-back points of each stencil never
-overlap. Therefore, the stencils can safely read from a shared source grid.
+By \emph{subdivision} we are able to split a large grid into many subgrids (see
+Figure~\ref{fig:sten-decomp}). The stencils can operate over their subgrids in
+parallel because the write-back points of each stencil never overlap. Therefore,
+the stencils can safely read from a shared source grid.
 
 \begin{figure}[h]
 \centering
@@ -569,7 +562,8 @@ overlap. Therefore, the stencils can safely read from a shared source grid.
 \includegraphics[width=0.95\textwidth]{figs/stencil-parallelised.pdf}
 \caption{After subdivision}
 \end{subfigure}
-\caption{Subdivision of a grid for a 5-point stencil.}
+\caption{Subdivision of a grid for a 5-point stencil. The cursor location is
+  shifted across the whole grid to produce a new grid.}
 \label{fig:sten-decomp}
 \end{figure}
 
@@ -596,9 +590,9 @@ as follows:
 
 \begin{tabular}{p{0.1\textwidth} p{0.8\textwidth}}
 
-\texttt{X*Y:} & The syntax defines the dimensionality of the stencil and helps
-to parse the arguments. \texttt{X} and \texttt{Y} are both dimension variables
-(as is \texttt{Z}). They are combined using the \texttt{*} operator.  \\
+  \texttt{X*Y:} & The syntax defines the dimensionality of the
+  stencil. \texttt{X} and \texttt{Y} are both dimension variables (as is
+  \texttt{Z}). They are combined usingthe \texttt{*} operator.  \\
 
 \texttt{|} & The arguments are enclosed within pipe characters.  Their
 arrangement in code is typically indented to reflect their grid shape.  \\
@@ -606,9 +600,8 @@ arrangement in code is typically indented to reflect their grid shape.  \\
 \texttt{a,b,\_} & Arguments can either be named or wildcard denoted
 respectively with either a variable name or an underscore.  \\
 
-\texttt{@} & This annotation denotes the variable is the cursor
-(see Section~\ref{sec:primitives}), the central cell whose position is used for the
-result of the stencil.  \\
+\texttt{@} & This annotation denotes the variable is the cursor, the central cell whose position is used for the
+result of the stencil (see Section~\ref{sec:primitives}).  \\
 
 \texttt{->} & Delimiter that separates the grid pattern and the stencil body. It
 appears to be normal Haskell syntax apart from recursion and function
@@ -642,7 +635,7 @@ As well as the syntax for stencil functions, Ypnos provides a library of
 primitive operations. The primitives can be combined to create complex
 accelerated computations over grids. The main primitive in Ypnos is \emph{run}
 (see Listing~\ref{lst:run-red}), which applies the stencil computation to a
-grid.\todo{Different diagram.}
+grid.
 
 \begin{hflisting}[label={lst:run-red}, caption={The basic \texttt{run},
 \texttt{reduce} and, \texttt{reduceR} primitive as defined in the original Ypnos
@@ -661,17 +654,17 @@ mkReducer :: exists b. (a -> b -> b)
                     -> Reducer a
 \end{hflisting}
 
-The application is done by moving the stencil cursor over each location
-in the grid. The arguments of the stencil are taken from positions in
-the grid relative to the cursor. The value is then computed using the
-specified computation and put into the same cursor location in a
-\emph{new} grid.
+The application is done by moving the stencil cursor over each location in the
+grid (we saw this illustrated in \autoref{fig:sten-decomp}). The arguments of
+the stencil are taken from positions in the grid relative to the cursor. The
+value is then computed using the specified computation and put into the same
+cursor location in a \emph{new} grid.
 
 In some locations near the edge of the grid there may not be enough neighbours
 to satisfy a stencil. In this case Ypnos provides a special syntax for dealing
-with these \emph{boundaries}. The implementation of boundaries beyond the scope
-of this project. However, a brief description of their behaviour will aid the
-reader's understanding.
+with these \emph{boundaries}. The implementation of boundaries is beyond the
+scope of this project. However, a brief description of their behaviour will aid
+the reader's understanding.
 
 For each boundary of the grid, outside of which the stencil may access, a value
 is computed by a user defined function. The function may use the current
@@ -685,11 +678,10 @@ whose purpose is to summarise the contents of a grid in one value (see
 Listing~\ref{lst:run-red}). It may be used to compute functions such as the mean,
 sum or minimum/maximum.
 
-The primitive uses an associative operator (of type \texttt{a -\textgreater{} a
-  -\textgreater{} a}) to combine all the elements of the grid to one value. A
-more general version of this operator also exists (see
-Listing~\ref{lst:run-red}), which supports an intermediary type (or partial
-value).
+The primitive uses an associative operator (of type \texttt{a -> a -> a}) to
+combine all the elements of the grid to one value. A more general version of
+this operator, \emph{reduceR}, also exists (see Listing~\ref{lst:run-red}),
+which supports an intermediary type (or partial value).
 
 The \emph{Reducer} data type takes the following parameters:
 
@@ -747,7 +739,7 @@ operation. This means that when such an array is evaluated a CUDA program must
 be executed on the GPU.
 
 Arrays are signalled for use on the GPU via the \texttt{use} primitive.  They
-are copied-on, executed and copied-off via the \texttt{run}. This primitive is
+are copied-on, executed and copied-off via \texttt{run}. This primitive is
 responsible for the run-time compilation and actual data transfer. All other
 operations build an abstract syntax tree (AST) to be compiled by the
 \texttt{run} primitive. Together \texttt{use} and \texttt{run} form the
@@ -768,25 +760,22 @@ scalars. A classic example of this is the map function which transforms an
 entire array by a function over the individual values\footnote{In fact, the map
   function is conceptually similar to stencil application. The difference being
   that stencils take into account the neighbourhood of a cell to compute
-  the next value whereas map takes only the central value.}. For this reason, in addition to the \texttt{Acc} type,
+  the next value whereas map takes only the central value.}(\autoref{lst:map}). For this reason, in addition to the \texttt{Acc} type,
 Accelerate also provides the \texttt{Exp} type where the former represents
 collective operations and the latter represents scalar computations. The two
 types correspond to the two different types of AST built: one for scalar and the
 other for array operations.
 
-The map function is depicted in Listing~\ref{lst:map}.\todo{compare run and map? Comonads?}
-
 \begin{hflisting}[label={lst:map}, caption=The type of the \texttt{map}
   operation as defined by Accelerate.]
-map :: (Exp a -> Exp b) -> Acc (Array sh a)
-       -> Acc (Array sh b)
+map :: (Exp a -> Exp b) -> Acc (Array sh a) -> Acc (Array sh b)
 \end{hflisting}
 
 Scalar operations do not support any type of iteration or recursion in order to
 prevent divergent operation at run-time. However, most other Haskell code is
 allowed. This is achieved by the Haskell type class mechanism (for ad-hoc
-polymorphism)-- Accelerate provides instances of \texttt{Exp a} for most common
-classes.
+polymorphism, discussed further in \autoref{sec:typeclasses})-- Accelerate
+provides instances of \texttt{Exp a} for most common classes.
 
 For example, to support addition, subtraction and other numerical operations,
 Accelerate provides an instance of the type class \texttt{Num}. This means that
@@ -800,7 +789,7 @@ operations can be typed as shown in Listing~\ref{lst:num}.
 \subsection{Stencil Support}
 
 Whilst \texttt{map} for an array applies a scalar function to every element in
-an array, Accelerate provides support for stencil computations via the
+an array, Accelerate provides support for running stencil computations via the
 \texttt{stencil} function (see Listing~\ref{lst:sten}).
 
 \begin{hflisting}[label={lst:sten}, caption={The type of the stencil application
@@ -817,15 +806,15 @@ instance Stencil DIM2 a ((Exp a, Exp a, Exp a)
                         ,(Exp a, Exp a, Exp a))
 \end{hflisting}
 
-The first parameter is a function which represent the stencil. We see that
+The first parameter is a function which represents the stencil. We see that
 \texttt{sten}, the type of the stencil argument, takes the form of a tuple grid
 of \texttt{Exp a} element type. This allows Accelerate to use Haskell's function
 syntax to define stencils.
 
 The second parameter is the type of boundary. In Accelerate, the types of
 boundary allowed are fixed as opposed to Ypnos boundaries which can be fully
-specified. One of the types allowed is \texttt{Mirror} which deals with an out
-of bounds access by picking the nearest coordinate from within the array.
+specified. One of the types allowed is \texttt{Mirror} (see
+\autoref{sec:primitives}).
 
 With these two parameters we have defined an operation which performs the
 stencil convolution. An example stencil function is given in
@@ -847,9 +836,8 @@ type Stencil3x3 = ((Exp a, Exp a, Exp a)
 
 In this section we have seen an analysis of the project's requirements which
 allowed me to prioritise the work for the project. Based on the requirements a
-choice of tools and libraries was made. Throughout the project an iterative
-approach to development was chosen to meet as many of the requirements as
-possible in the time given.
+choice of tools and libraries was made. An iterative approach to development was
+chosen to meet as many of the requirements as possible in the time given.
 
 At the beginning of the project, time was spent on familiarisation with the
 tools and libraries as well as the Ypnos language itself. Complex parts of the
@@ -1913,13 +1901,6 @@ The same procedure is used for the reduce primitive. We use a one-dimensional
 grid for this case as the built-in Haskell function we are comparing against is
 one-dimensional. The resulting reduced values are compared and a failure is
 registered if they should differ.
-
-For the large part of the project I have been coding tests and implementation in
-parallel (also known as TDD). This allowed me to catch errors early on and fix
-them immediately.  TDD allowed for much faster debugging as it provides
-confidence in the functionality of certain parts of code. This meant that when I
-encountered bugs I was able to pin-point their origin often without the use of a
-debugger.
 
 \section{Usability}
 

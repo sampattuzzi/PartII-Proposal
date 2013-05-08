@@ -17,6 +17,7 @@
 \usepackage{subcaption}
 \usepackage{titling}
 \usepackage{pifont}
+\usepackage{needspace}
 \usepackage
 %[disable]
 {todonotes}
@@ -304,6 +305,10 @@ The goals were further divided into \emph{functional} and \emph{non-functional}
 requirements. Functional requirements specify what had to be implemented and
 built during the course of the project. Non-functional requirements specify how
 the system should perform and be tested.
+
+An extra requirement was introduced since the proposal, namely a \emph{usable
+  API}. Practically, this means that converting between CPU and GPU
+implementations of the same program should require minimal code changes.
 
 High risk and high priority requirements needed special attention to prevent the
 project from falling behind schedule. In scheduling the tasks, I took a
@@ -859,7 +864,7 @@ system.
 
 \section{Iterative Development}
 
-The iterative development approach was followed throughout the implmentation of
+The iterative development approach was followed throughout the implementation of
 this project. Table~\ref{tbl:iter} describes the phases of development: each
 phase consisted of a working code prototype and a small usability evaluation. In
 the following sections I will describe each approach taken in more detail.
@@ -867,7 +872,7 @@ the following sections I will describe each approach taken in more detail.
 \begin{table}
 \begin{tabular}{l l | p{10cm}}
   Phase 1 & Motivation & Create a working translation and run primitive using Accelerate.\\
-  & Produced & The non-unifying approach to primitives and type system approach to stencil translation with centring (Section~\ref{sec:non-unify-appr}).
+  & Produced & The non-unifying approach to primitives and compile time approach to stencil translation with centring (\autoref{sec:non-unify-appr} and \autoref{sec:typesysapproach}).
   \\
   Phase 2 & Motivation & Reduce the code changes the programmer must perform and unify the CPU and GPU run primitives.\\
   & Produced & The run and reduce primitives using type class parameters (Listing~\ref{lst:redgrid})
@@ -888,7 +893,8 @@ Compilation of stencils was a central task in this project. The abstract Ypnos
 syntax is compiled down to Haskell AST to be run. Accelerate's implementation
 has overridden much of the Haskell operators required for this translation
 stage, so the bulk of the effort went into producing the functions that contain
-the computations. These functions take the form of Listing~\ref{lst:ypsten}
+the stencil computations. These functions take the form of
+Listing~\ref{lst:ypsten}
 
 The arguments are formed as tuples of tuples. The rest of the stencil is normal
 Haskell code. However, the return type, \texttt{Exp a}, insures that all the
@@ -897,10 +903,8 @@ is then translated at run-time into CUDA code.
 
 Ypnos achieves its custom syntax via Haskell's quasiquoting mechanism, a
 language feature which allows the library author to provide custom syntax for
-domain specific languages\cite{mainland2007}.  As such, it is a perfect fit for
-Ypnos, which would like to hide the underlying implementation from the user. The
-programmer must provide a parser object (refered to as a quasiquoter) and a
-syntax for applying it within normal Haskell code. The essential function of a
+domain specific languages\cite{mainland2007}. The programmer must provide a
+parser object (refered to as a quasiquoter). The essential function of a
 quasiquoter is to provide an abbreviation for entering the AST manually.
 
 Take, for example, the situation in which we want to write an embedded
@@ -922,10 +926,9 @@ We see that the quasiquoter \texttt{expr} allows us to abbreviate the expression
 
 We could sensibly do the translation from Ypnos to Accelerate stencils in one of
 two ways: we (a) use Haskell's type system to mask the difference between the
-two compiled operations or (b) we use run-time compilation to mask the
-difference between the implementations and maintain the resemblance of the
-types. I explored each of these approaches in the course of the project and the
-benefits and drawbacks of both are presented in the next section.
+two operations at compile-time or (b) we use run-time compilation to mask the
+difference between the implementations. Benefits and drawbacks of both are
+presented in the next section.
 
 \subsection{Centring}
 \label{sec:centring}
@@ -933,31 +936,30 @@ benefits and drawbacks of both are presented in the next section.
 One way in which Accelerate and Ypnos stencils differ is that the former assumes
 that the cursor is at the centre of an odd sized grid ($3 \times 5, 5 \times 5$)
 whereas the later allows the user to specify the centre. Ypnos stencils can be
-translated to Accelerate stencils by padding the stencil given to Accelerate
+translated to Accelerate stencils by padding the stencil passed to Accelerate
 such that the cursor is centred.
 
-This is, illustrated by example. Assume a one dimensional stencil with the
-cursor at an off-centre location (denoted by \texttt{c}) --
-Figure~\ref{fig:cursor}.
+Take an example: assume a one dimensional stencil with the cursor at an
+off-centre location (denoted by \texttt{c}) -- Figure~\ref{fig:cursor}.
 
 \begin{figure}
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{figs/align1.pdf}
-    \caption{The stencil before centring. Note the even shape ($4\times0$).}
+    \caption{The stencil before centring. Note the even shape ($4\times1$).}
     \label{fig:cursor}
   \end{subfigure}
   ~
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{figs/align2.pdf}
     \caption{The same stencil after centring. Note the shape is now odd
-      ($5\times0$)}
+      ($5\times1$)}
     \label{fig:centredcursor}
   \end{subfigure}
   \caption{Where $a$ is the position of the cursor and $b$ -- the length of the
     stencil.  In this diagram $pad_{start}$ represents the offset which needs to
-    be applied to the centre, i.e the amount to pad the start of the grid. By
-    contrast, $pad_{end}$ represents the amount to pad the end of the grid. }
+    be applied to the centre, i.e the amount to pad the start of the
+    grid. $pad_{end}$ represents the amount to pad the end of the grid. }
 \end{figure}
 
 Now we must determine the padding such that the cursor is centred. This is given
@@ -971,15 +973,15 @@ This means that after centring we get Figure~\ref{fig:centredcursor}
 
 In order to implement the centring I had to consider both the one and two
 dimensional cases.  It would be quite easy to deal with this in two separate
-cases, except it must be possible to extend the approach to higher dimension
-eventually. I considered three principle approaches to doing this: using lists
-as intermediaries; using arrays as intermediaries; or operating on the grid
+cases, except it must be possible to extend the approach to higher dimensions. I
+considered three principle approaches to doing this: using lists as
+intermediaries; using arrays as intermediaries; or operating on the grid
 patterns directly via type classes.  Before addressing the approaches I will
-mention the types I was converting (see Listing~\ref{lst:gridpattern}).
+mention the types in question (see Listing~\ref{lst:gridpattern}).
 
 \begin{hflisting}[label={lst:gridpattern}, caption=The data type which stores
   the grid patterns in Ypnos. Notice that the dimensionality is not exposed in
-  the type.]
+  the type but hidden.]
 data GridPattern = GridPattern1D DimTag [VarP] |
                    GridPattern2D DimTag DimTag [[VarP]]
 \end{hflisting}
@@ -1030,9 +1032,9 @@ instance Eq Integer where
 Type families (also known as indexed type families) allow us to apply the same
 kind of parameterisation as in type class to the
 types\cite{chakravarty05}. Formally, type families are type functions from one
-or more types to a single type. As with type classes we have both a head
-declaration and instances which define the family. The interface describes the
-\emph{``kind''}\footnote{A kind is the type theoretic name for a type for
+or more types to a single type. As with type classes there are both head
+declarations and instances which define the family. The declaration describes
+the \emph{``kind''}\footnote{A kind is the type theoretic name for a type for
   types. \texttt{*} denotes the kind of base types in Haskell.} of the family
 and defines how many type arguments are taken.
 
@@ -1049,7 +1051,7 @@ instance declarations of the type family are bound to the corresponding
 declarations of the type class. Listing~\ref{lst:assoctypefam} gives an example
 of an associated data family for patterns as opposed to it standing alone in
 Listing~\ref{lst:datafam}. The usage of type synonym families will be discussed
-in detail later.
+in detail in \autoref{sec:intr-type-class}.
 
 \begin{hflisting}[label=lst:datafam, caption=The data family declares two
   different constructors for 1D and 2D lists. The dimensionality of the list is
@@ -1080,13 +1082,13 @@ instance GridIx (Int) where
 
 \subsubsection{Intermediate Approaches}
 
-The first approach taken involved first, converting from grid patterns into
-lists, then balancing these lists, and finally converting them into the centred
-tuples needed for the Accelerate functional representation. In order to do this
-I would have to define functions for measuring the location of the cursor, and
-padding the lists before and after. This approach proved difficult as lists did
-not explicitly incorporate their dimensionality in the type. This made it hard
-to treat the 1D and 2D cases differently.
+The first approach to centring taken involved first, converting from grid
+patterns into lists, then balancing these lists, and finally converting them
+into the centred tuples needed for the Accelerate functional representation. In
+order to do this I would have to define functions for measuring the location of
+the cursor, and padding the lists before and after. This approach proved
+difficult as lists did not explicitly incorporate their dimensionality in the
+type. This made it hard to treat the 1D and 2D cases differently.
 
 The second approach attempted to use existing array code in order to avoid
 writing such functions. The hope was that by converting to arrays, rather than
@@ -1104,7 +1106,8 @@ basic operations -- \texttt{addBefore}, \texttt{addAfter}, \texttt{find} and
 \texttt{size} -- in a dimension-sensitive way while still being polymorphic.
 
 \begin{hflisting}[label={lst:gridix}, caption=The class declaration of
-  \texttt{GridIx} showing the main functions defined for the grid manipulation.]
+  \texttt{GridIx} showing the main functions defined for the grid manipulation
+  and an associated data family.]
 class (Ix i, Num i, ElMax i) => GridIx i where
     data GridPatt i :: * -> *
     addBefore :: i -> a -> GridPatt i a -> GridPatt i a
@@ -1130,28 +1133,23 @@ translation (described next).
 As we saw in the previous section, the types of the Ypnos CPU stencil and the
 Accelerate library's stencil differ wildly. Listing~\ref{lst:avgsten} shows the
 difference for the \texttt{avg}\footnote{For the sake of simplicity I have
-  excluded the type constraints relating to boundaries as these are very long
+  excluded the type constraints relating to boundaries as these are long
   and complicated.}  stencil.
 
 \begin{hflisting}[label={lst:avgsten}, caption={The average function implemented
-on both the CPU and GPU. Notice how the types differ. The constraints are
-simplified.}]
-avgCPU :: (Array a, Floating a) =>
-          Grid (Dim X :* Dim Y) a -> a
-avgGPU :: Floating (Exp a) =>
-          Stencil3x3 a -> Exp a
+    on both the CPU and GPU. Note the difference in types. The constraints are
+    simplified.}]
+avgCPU :: (Array a, Floating a) => Grid (Dim X :* Dim Y) a ->     a
+avgGPU ::      Floating (Exp a) =>            Stencil3x3 a -> Exp a
 \end{hflisting}
 
 In the GPU case we see that the type (once expanded) is tuples of tuples of
-\texttt{Exp a}. This allows Accelerate to make use of the built-in Haskell
-syntax for functions. On the other hand, in the Ypnos case we see that arguments
-take the form of a grid, which is exactly the same type as the grids it operates
-on.
+\texttt{Exp a}. On the other hand, in the Ypnos case we see that arguments take
+the form of a grid, which is exactly the same type as the grids it operates on.
 
 The Ypnos grid type is a \emph{comonad}, a functional programming design pattern
-arising from Category Theory\cite{uustalu2008}\todo{Is this fair use?}. The run
-primitive is an operation of the comonad, \texttt{cobind}
-(Listing~\ref{lst:cobind}).
+arising from Category Theory. The run primitive is an operation of the comonad,
+\texttt{cobind} (Listing~\ref{lst:cobind}).
 
 \begin{hflisting}[label={lst:cobind}, caption={The definition of cobind. Let
     \texttt{D} be a grid of a certain dimension and \texttt{a} and \texttt{b} be
@@ -1161,9 +1159,10 @@ cobind :: (D a -> b) -> D a -> D b
 
 The type system approach (or compile-time approach) means that Ypnos stencil
 syntax is translated directly to a function with Accelerate type
-(e.g. \texttt{avgGPU}) by using a different quasiquoter. Advanced type-system
-features in Haskell are used to unify the two types of stencils. The details,
-advantages and disadvantages of the two approaches will be discussed further in
+(e.g. \texttt{avgGPU}) by using a different quasiquoter. This was implemented by
+me in the \texttt{funGPU} quasiquoter (see \autoref{sec:usage} for usage
+examples). Advanced type-system features in Haskell are used to unify the two
+types of stencils. The pros and cons of this approach will be discussed in
 Section~\ref{sec:prims}.
 
 Unfortunately, by translating directly to the Accelerate stencil type we lose
@@ -1171,19 +1170,17 @@ the comonadic nature of the type. This is a shame, because this type is both
 informative to the programmer (as it is a functional pattern), yet flexible
 enough that by changing the instance of \texttt{D} we change the implementation.
 
-The advantage of this method (as we will see more in detail when we discuss the
-alternative) is that all the translation effort is done at compile-time allowing
-the running of the stencil to be more efficient.
+The advantage of this method is that all the translation effort is done at
+compile-time allowing the running of the stencil to be more efficient.
 
 \subsection{Run-time Approach to Translation}
 \label{sec:runtimetrans}
 
 The second approach to the translation of stencils was to keep the types the
-same (or similar, as we will see) to Ypnos' original implementation.  This is
-alluring as it allows us to both expose more information to the user through the
-program's type and maintain the theoretic underpinnings of Ypnos -- the
-comonadic structure. In order to achieve this, some run-time type conversions
-had to be done.
+same as Ypnos' original implementation.  This is alluring as it allows us to
+both expose more information to the user through the program's type and maintain
+the theoretic underpinnings of Ypnos -- the comonadic structure. In order to
+achieve this, some run-time conversions had to be done.
 
 As already seen, we would like the \texttt{run} primitive to take the
 form given in Listing~\ref{lst:run2}
@@ -1225,8 +1222,8 @@ stencil :: Comonad g => g (Exp a) -> Exp b
 stencil' :: Comonad g => g a `arrow` b
 \end{hflisting}
 
-Because of the arrow type, \texttt{stencil} and \texttt{stencil'} can
-actually have the same type.
+Because of the arrow type, \texttt{stencil} and \texttt{stencil'} can now have
+the same type.
 
 The type of stencil accepted by Accelerate is still not of the form \texttt{g
   (Exp a) -\textgreater{} Exp b}. A conversion function builds an Accelerate
@@ -1234,11 +1231,11 @@ stencil (call it \emph{stencil A}) at run-time using the stencil encapsulated in
 the arrow data type (call it \emph{stencil B}). Stencil A's arguments are used
 to build up a grid of type \texttt{g (Exp a)}, then stencil B is used on this
 grid to produce the result of type \texttt{Exp b}, finally this is returned as
-stencil A's result. So stencil A becomes a wrapper around stencil B.
+stencil A's result. So stencil A behaves as a wrapper around stencil B.
 
 While this run-time conversion creates an overhead, it also simplifies the types
-significantly. However, a technique called deforestation may be used to mitigate
-this\footnote{Deforestation is also known as ``short cut fusion''. It is
+significantly. A technique called deforestation may be used to mitigate the
+overhead\footnote{Deforestation is also known as ``short cut fusion''. It is
   essentially an optimisation which eliminates intermediate data
   structures.}. Such optimisation is beyond the scope of this project due to
 time constraints.
@@ -1267,8 +1264,9 @@ trade-offs which lead to the final approach.
 \label{sec:non-unify-appr}
 
 The run primitive implemented in Phase 1 (see \autoref{tbl:iter}) used the
-compile-time implementation of the stencil function. At the highest level this
-meant that the function \texttt{run} had type given in \autoref{lst:runtype}.
+compile-time implementation of the stencil function
+(\autoref{sec:typesysapp}). At the highest level this meant that the function
+\texttt{run} had type given in \autoref{lst:runtype}.
 
 \begin{hlisting}[label={lst:runtype}, caption=The type of run required by Accelerate.]
 run :: (Stencil sh x sten) => (sten -> Exp y) -> Grid d x -> Grid d y
@@ -1282,27 +1280,26 @@ function. In the end this type becomes unwieldy -- it is not straight-forward
 for the user to write in their code.
 
 Similar problems would have plagued the implementation of the \texttt{reduce}
-primitive. However, having seen the first implementation of the \texttt{run}
+primitive. However, having first seen the implementation of the \texttt{run}
 primitive I decided that a different approach was necessary so this incarnation
 of the \texttt{reduce} primitive was never implemented.
 
 \subsection{Introducing Type Classes}
+\label{sec:intr-type-class}
 
 In this project I am aiming both to make an accurate and fast translation as
-well as one which is easy for the programmer to use.  Practically, this means
-that converting between CPU and GPU implementations of the same program should
-require minimal code changes\todo{Mention this earlier}.  With the previous
-approach we saw how this did not work for two reasons: (a) the run primitive I
+well as one which is easy for the programmer to use.  With the previous approach
+we saw how this did not work for two reasons: (a) the run primitive I
 implemented was not related (as far as Haskell was concerned) to the original
 CPU primitive, and (b) the types of the two primitives differed, which could
 cause compilation to fail if they were swapped.
 
 The ideal would be a function which behaves differently under certain program
 conditions. The perfect tool for this job is ad-hoc polymorphism which is
-provided in Haskell via type classes (see Section~\ref{sec:typeclasses}). The
-result is an implementation of the primitive which changes dependent on a
-particular type parameter. The obvious parameter in our case is the grid type,
-that is, have different grid types for different backends.
+provided in Haskell via type classes (see \autoref{lst:avgsten}). The result is
+an implementation of the primitive which changes dependent on a particular type
+parameter. The obvious parameter in our case is the grid type, that is, have
+different grid types for different backends.
 
 We have seen this before: in some of the code examples I have used the notation
 ``Comonad g'' to refer to a grid which implements the primitives of Ypnos. This
@@ -1311,12 +1308,6 @@ stencil translation (see Section~\ref{sec:runtimetrans}), namely the types of
 stencil required by Accelerate and Ypnos differ.
 
 \subsubsection{Type Class Parameter}
-
-The first approach to reconciling the stencil uses Haskell type classes
-parametrized by more than one type. This allows us to abstract over parts of the
-type that change to give a unified type. As the reduce primitive was the first
-to bring about such issues, let's examine how this approach can be applied to it
-(see Listing~\ref{lst:redgrid}).
 
 \begin{hflisting}[label={lst:redgrid}, caption={The \texttt{ReduceGrid} type
 class defined with type parameters for each variable: \texttt{a}, \texttt{b} and
@@ -1346,11 +1337,17 @@ instance RunGrid CPUGrid CPUStencil
 instance RunGrid GPUGrid GPUStencil
 \end{hflisting}
 
+The approach taken in Phase 2 to reconciling the stencil uses Haskell type
+classes parametrized by more than one type. This allows us to abstract over
+parts of the type that change to give a unified type. As the reduce primitive
+was the first to bring about such issues, let's examine how this approach can be
+applied to it (see Listing~\ref{lst:redgrid}).
+
 In this approach we are able to have instances for \texttt{Reducer} for the CPU
 and GPU based on the grid type yet we also change the types of values accepted
 by the functions of the Reducer. These types correspond to different types of
-functions which tells Haskell to use Accelerate's overloaded versions of
-operators.
+functions (\texttt{Exp a}) which tells Haskell to use Accelerate's overloaded
+versions of operators.
 
 We also see that the \texttt{RunGrid} type class is treated in a similar manner:
 the type of grid uniquely determines the type of stencil function required. This
@@ -1363,11 +1360,12 @@ Unlike the \texttt{reduceG} example, Haskell cannot, without help from the
 programmer, choose a different quasiquoter (as is required with the static
 approach as seen in Section~\ref{sec:typesysapp}).
 
+\needspace{3\baselineskip}
 In theory, this approach should work, however, it brings some usability
 problems. Let's further examine the type of the \texttt{reduceG} primitive
 when applied to \texttt{GPUGrid}s (see Listing~\ref{lst:redgpu})
 
-\begin{hflisting}[label={lst:redgpu}, caption={The type of the reducer once the
+\begin{hlisting}[label={lst:redgpu}, caption={The type of the reducer once the
     Accelerate types are applied.}]
 Reducer :: (Exp a -> Exp b -> Exp b)
         -> (Exp b -> Exp b -> Exp b)
@@ -1377,7 +1375,7 @@ Reducer :: (Exp a -> Exp b -> Exp b)
 reduceG :: Reducer (Exp a) (Exp b) (Exp c)
         -> GPUGrid
         -> Exp c -- Return value
-\end{hflisting}
+\end{hlisting}
 
 Notice that both the return value and default value of the reducer have type
 \texttt{Exp}, which is problematic, as \emph{lifting} and
@@ -1385,18 +1383,17 @@ Notice that both the return value and default value of the reducer have type
   \texttt{a} to type \texttt{Exp a}. Unlifting is the inverse process. Both
   aren't always possible.}  is not easy for the user to do and the wrapped value
 is not particularly useful or meaningful once returned to the user. One approach
-to changing this would be to introduce dependent type parameters for the
-functions rather than the values. However, the approach taken next offers
-greater flexibility.
+to changing this would be to introduce type parameters for the functions rather
+than the values. However, the approach taken next offers greater flexibility.
 
 \subsubsection{Associated Type Families}
 \label{sec:assoctypefam}
 
 We already encountered associated type families in
 Section~\ref{sec:typefam}. Here we will be using type synonym families as
-opposed to data families. These allow the unification of the different function
-types required (see Listing~\ref{lst:typesynfam} for an example of type synonyms
-families unifying different function types).
+opposed to data families (Phase 4). These allow the unification of the different
+function types required (see Listing~\ref{lst:typesynfam} for an example of type
+synonyms families unifying different function types).
 
 \begin{hflisting}[label=lst:typesynfam, caption=The type synonym family is used
   as a type function. It is used to work out the element type of a collection.
@@ -1409,37 +1406,42 @@ type instance Fun GPUGrid a b = (Exp a -> Exp b)
 
 \end{hflisting}
 
-
+\needspace{7\baselineskip}
 The ideal type for the \texttt{Reducer} in the GPU implementation is given in
 Listing~\ref{lst:reduceideal}
 
-\begin{hflisting}[label={lst:reduceideal}, caption={The optimal type for the
+\begin{hlisting}[label={lst:reduceideal}, caption={The optimal type for the
     reduce primitive under Accelerate.}]
 Reducer :: (Exp a -> Exp b -> Exp b)
         -> (Exp b -> Exp b -> Exp b)
         -> b -- Unlifted default
         -> (Exp b -> Exp c)
+        -> Reducer a b c
+
 reduceG :: Reducer a b c -> GPUGrid -> c -- Unlifted return
-\end{hflisting}
+\end{hlisting}
 
-Clearly, this is an improvement to the user as they get a simple return value
-which they know how to use. By examining this we can deduce that there are
-actually two types of abstract function involved: 1- and 2-argument functions of
-\texttt{Exp}s. If we implement these as two associated type families we get the
-behaviour required (see Listing~\ref{lst:redtypefam})
+\needspace{14\baselineskip}
 
-\begin{hflisting}[label={lst:redtypefam}, caption={The application of type
+This make the default easier to provide and result easier to use. By examining
+this we can deduce that there are actually two types of abstract function
+involved: 1- and 2-argument functions of \texttt{Exp}s. If we implement these as
+two associated type families we get the behaviour required (see
+Listing~\ref{lst:redtypefam})
+
+\begin{hlisting}[label={lst:redtypefam}, caption={The application of type
     families to the reduce primitive.}]
 Reducer :: Fun2 g a b b
         -> Fun2 g b b b
         -> b
         -> Fun1 g b c
+        -> Reducer g a b c
 
 class ReduceGrid g where
     type Fun1 g a b
     type Fun2 g a b c
     reduceG :: Reducer g a b c -> g -> c
-\end{hflisting}
+\end{hlisting}
 
 Next I wanted to extend this approach to the run primitive. However, with run we
 do not simply have a conversion of types, but also conditions on those types
@@ -1450,7 +1452,7 @@ family method using a Haskell language extension called
 type as seen in Section~\ref{sec:typefam}). An example of the \texttt{RunGrid}
 class modified in this way is given in Listing~\ref{lst:constkind}.
 
-\begin{hflisting}[label={lst:constkind}, caption={The application of type
+\begin{hlisting}[label={lst:constkind}, caption={The application of type
     families to the run primitive.}]
 class RunGrid g where
     type ConStencil g a b sten :: Constraint
@@ -1460,24 +1462,23 @@ class RunGrid g where
 instance RunGrid g where
     type ConStencil g a b sten = (Stencil sh a ~ sten, ShapeOf g ~ sh)
     type Stencil g a b sten = sten -> Exp b
-\end{hflisting}
+\end{hlisting}
 
-As we see, using associated type families is not very nice or general because we
-are exposing \texttt{sten} -- a type variable which has no relevance to the CPU
+As we see, using associated type families is not general because we are exposing
+\texttt{sten} -- a type variable which has no relevance to the CPU
 implementation. Though it can be safely ignored, it exposes too much of the
-underlying type difference which we are actually coding against and so does not
-decouple the two implementations. As we will see in Section~\ref{sec:final},
-this problem can be mitigated by taking a hybrid approach.
+underlying type difference which we are coding against and so does not decouple
+the two implementations. As we will see in Section~\ref{sec:final}, this problem
+can be mitigated by taking a hybrid approach.
 
 \subsubsection{Associated data families}
 \label{sec:assoc-data-fam}
 
-As opposed to specifying the stencil type as an associated type family we may
-wish to be explicit about the type of stencil function being creating -- much
-like the using a type class parameter. To achieve this we can make use of
+Associated type families make the type of the stencil function explicit again
+(Phase 3), as with the type class parameter. To achieve this we can make use of
 associated data families (see \autoref{sec:typefam}). These work in much the
-same way as type families, except that rather than binding a particular synonym
-to a class we bind a data type definition.
+same way as type families, but rather than binding a particular synonym to a
+class we bind a data type definition.
 
 Listing~\ref{lst:rundatafam} shows the \texttt{RunGrid} type class defined using
 data families. We can see that the data family has replaced both the type and
@@ -1490,26 +1491,24 @@ class RunGrid g where
     runG :: Sten g a b -> g a -> g b
 \end{hflisting}
 
-We are able to do this due to another Haskell type extension called
-\emph{generalized algebraic data types} (GADTs) which, amongst other things,
-allow us to place arbitrary type constraints on constructors
-(\autoref{lst:stendatafam}).
+This is done with \emph{generalized algebraic data types} (GADTs, another
+Haskell type extension) which, amongst other things, allow us to place arbitrary
+type constraints on constructors (\autoref{lst:stendatafam}).
 
 \begin{hlisting}[label=lst:stendatafam,
 caption={An example of a stencil data type for the GPU. Note the argument it takes is a stencil function (of type \texttt{sten -> Exp b}) where \texttt{sten} has been constrained in the required way.}]
 data Sten (Array sh) a b where
-        Sten :: (Shape sh, Stencil sh a sten,
-                 Elt a, Elt b) =>
+        Sten :: (Shape sh, Stencil sh a sten,  -- constraints
+                 Elt a, Elt b) =>              -- |
                 (sten -> Exp b)
                 -> Sten (Array sh) a b
 \end{hlisting}
 
-This allows for much cleaner implementation on
-our part but requires the programmer to use different data constructors for the
-different implementations (CPU versus GPU stencil functions). This is manageable
-when we are only dealing with the different stencil types, however, when we add
-in the different types of reduction function too, the programmer must make many
-code changes.
+This allows for much cleaner implementation on our part but requires the
+programmer to use different data constructors for the different implementations
+(CPU versus GPU stencil functions). This is manageable when we are only dealing
+with the different stencil types, however, if we add in the different types of
+reduction function too, the programmer must make too many code changes.
 
 \subsection{Final implementation}
 \label{sec:final}
@@ -1530,19 +1529,19 @@ class ReduceGrid g where
     reduceG :: Reducer g a c -> g a -> c
 \end{hflisting}
 
-The final implementation made a trade off between the two approaches we have
-seen already. It combines the type parameter for the \texttt{arrow}
-type\footnote{This is effectively the same as having used an associated data
-  type, except a type synonym could be passed.} in the \texttt{RunGrid} class
-with associated type families for constraints and generalized functions in the
-\texttt{ReduceGrid} class (see Listing~\ref{lst:final}).
+The final implementation was a trade off between approaches. It combines the
+type parameter for the \texttt{arrow} type\footnote{This is effectively the same
+  as having used an associated data type, except a type synonym could be
+  passed.} in the \texttt{RunGrid} class with associated type families for
+constraints and generalized functions in the \texttt{ReduceGrid} class (see
+Listing~\ref{lst:final}).
 
 The \texttt{RunGrid} class makes use of functional dependencies to ensure that
-the \texttt{arrow} constructor the programmer has specified fully determines the
-grid implmentation to be used. Using generalised constructors and destructors
-(Section~\ref{sec:usage}) means that if the programmer is building their grids
-from lists then the correct implementation's grid will be decided based on the
-\texttt{arrow} type used.
+the \texttt{arrow} constructor the programmer specifies fully determines the
+grid implmentation to be used. When using generalised constructors and
+destructors (Section~\ref{sec:usage}) this means that if the programmer is
+building their grids from lists then the correct implementation's grid will be
+decided based on the \texttt{arrow} type used.
 
 By using a type and not type synonyms for the stencil function I have eliminated
 the need to expose a type variable in the declaration for type synonyms (as seen
@@ -1554,8 +1553,8 @@ GADT.
 
 The examples in Listing~\ref{lst:example} are taken directly from the unit tests
 for the application. They show the usage of the generalized constructors as well
-as the \texttt{run} and \texttt{reduce} primitives.\todo{Stress user doesn't see
-  crazy type stuff.}
+as the \texttt{run} and \texttt{reduce} primitives. As we can see the user
+doesn't have to deal with any of the types we mentioned previously.
 
 \begin{hflisting}[label=lst:example,
 caption=Usage of the final system taken from the unit tests.]
@@ -1588,24 +1587,23 @@ runAvgCPU = runF (CPUArr avgY)
 
 \section{Summary}
 
-\todo{Refer back to iteration phases.}Recall from Section~\ref{sec:introduction-ypnos} that Ypnos is a collection of
+Recall from Section~\ref{sec:introduction-ypnos} that Ypnos is a collection of
 syntax extensions and a library of primitives. On top of the previously existing
 implementation, this project implemented: changes to the syntax extensions to
-allow the generation of GPU stencils (by a process called stencil compilation),
-library generalisation and API refinement, a re-factoring of CPU primitives to
-fit the new API, and a set of new GPU primitives.
+allow the generation of GPU stencils (by implementing the \texttt{funGPU}
+quasiquoter), library generalisation and API refinement, a re-factoring of CPU
+primitives to fit the new API, and a set of new GPU primitives.
 
 This chapter outlined: stencil compilation and the primitive implementation
 (reduce and run). Stencil compilation was attempted in a compile-time and
-run-time fashion and centring was implemented. Moreover, primitives were
-implemented in a non-unifying way and then various solutions were implemented to
-generalise them: type class parameters, associated types and data
-families.
+run-time fashion with centring. Moreover, primitives were implemented in a
+non-unifying way and then variously unified: type class parameters, associated
+types and data families.
 
 The pros and cons of each approach were discussed and at the end of the chapter
 I described the final approach chosen. The chapter is rounded off with a brief
 usage example for the translation, primitives, constructors and
-destructors.\todo{Ensure we get a double page here}
+destructors.
 
 \chapter{Evaluation}
 \label{chap:evaluation}

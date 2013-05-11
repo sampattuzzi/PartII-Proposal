@@ -19,11 +19,11 @@
 \usepackage{pifont}
 \usepackage{needspace}
 \usepackage
-%[disable]
+[disable]
 {todonotes}
 
 \usepackage{tikz}
-\usetikzlibrary{backgrounds,shapes,arrows,fit}
+\usetikzlibrary{backgrounds,shapes,arrows,fit,trees}
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{refs.bib}
@@ -36,9 +36,7 @@
             pdfauthor={Samuel Pattuzzi},
             pdftitle={GPU Accelerating the Ypnos Programming Language},
             pagebackref=true,
-            colorlinks=true,
-            urlcolor=black,
-            linkcolor=black,
+            colorlinks=false,
             pdfborder={0 0 0}}
 
 \def\sectionautorefname{Section}
@@ -85,6 +83,7 @@
 {\hfill\closequote\end{quote}\end{snugshade}}
 
 %TC:group hflisting 0 0
+%TC:group hlisting 0 0
 %TC:group tabular 1 1
 %TC:group table 0 1
 
@@ -290,7 +289,7 @@ methodology.
 Requirements analysis undertaken in the early stages of this project allowed me
 to proceed smoothly and identify potential points of failure early. Each major
 goal of the project was categorized according to priority, difficulty and risk
-(see Table~\ref{tbl:reqanal}).
+(see \autoref{tbl:reqanal}).
 
 The \emph{priority} signifies the importance to the completion of the project:
 essential requirements have been marked as high and optional extensions as
@@ -316,9 +315,9 @@ risk-driven approach: trying to implement the highest risk functional
 requirements first and test the highest risk non-functional requirements
 early. At the same time, to ensure compilation correctness I took a test-driven
 approach to development. I will talk about this in more detail in
-Section~\ref{sec:tdd}.
+\autoref{sec:tdd}.
 
-From the dependency analysis of Figure~\ref{fig:task-dep} a clear ordering to
+From the dependency analysis of \autoref{fig:task-dep} a clear ordering to
 the tasks is visible. The following order was adopted for the project: stencil
 compilation, correctness verification, essential primitives, evaluation,
 extensions.
@@ -390,7 +389,7 @@ I chose Accelerate because of the native Haskell support and stencil
 operations. It allowed me to abstract away from compiling to low-level C code
 and, instead, concentrate on translating to a more abstract and general API.
 
-Accelerate is discussed further in Section~\ref{sec:intr-axle}.
+Accelerate is discussed further in \autoref{sec:intr-axle}.
 
 \subsubsection{CUDA}
 
@@ -429,7 +428,7 @@ time constraints are the limiting factors of the iterative cycle.
 
 An iteratively developed project starts with an inception phase in which initial
 requirements and goals are layed out. The project then proceeds through cycles
-which consist of the following stages (see Figure~\ref{fig:iterative}):
+which consist of the following stages (see \autoref{fig:iterative}):
 
 \begin{itemize}
 \item
@@ -527,12 +526,12 @@ in the language and implementation.
 
 Ypnos consists of a library with various primitives used as the building blocks
 of programs. Ypnos also provides some custom syntax via macros (see
-Figure~\ref{fig:comp-stages}).
+\autoref{fig:comp-stages}).
 
 \subsection{Grids}
 
 The core data type in Ypnos is the \emph{grid}. As previously mentioned in
-Section~\ref{sec:ypnos}, the grid is Ypnos' generalisation of the array. Unlike
+\autoref{sec:ypnos}, the grid is Ypnos' generalisation of the array. Unlike
 the array, an Ypnos grid is implementation agnostic and could be implemented
 differently with different backends.
 
@@ -550,7 +549,7 @@ restricted\footnote{Access to global shared memory (between thread blocks) is
 that operations on the different cores must be highly data parallel.
 
 By \emph{subdivision} we are able to split a large grid into many subgrids (see
-Figure~\ref{fig:sten-decomp}). The stencils can operate over their subgrids in
+\autoref{fig:sten-decomp}). The stencils can operate over their subgrids in
 parallel because the write-back points of each stencil never overlap. Therefore,
 the stencils can safely read from a shared source grid.
 
@@ -589,7 +588,7 @@ out = run avg2D in -- Running the stencil on `in' to produce `out'
 \end{hlisting}
 
 Compare this with the much more verbose imperative version of the same stencil
-in Listing~\ref{lst:avgimp}.  The \texttt{fun} macro is used to provide a
+in \autoref{lst:avgimp}.  The \texttt{fun} macro is used to provide a
 special \emph{grid pattern} syntax. The basic syntax of Ypnos can be summarised
 as follows:
 
@@ -606,7 +605,7 @@ arrangement in code is typically indented to reflect their grid shape.  \\
 respectively with either a variable name or an underscore.  \\
 
 \texttt{@} & This annotation denotes the variable is the cursor, the central cell whose position is used for the
-result of the stencil (see Section~\ref{sec:primitives}).  \\
+result of the stencil (see \autoref{sec:primitives}).  \\
 
 \texttt{->} & Delimiter that separates the grid pattern and the stencil body. It
 appears to be normal Haskell syntax apart from recursion and function
@@ -639,7 +638,7 @@ for (i = 1; i < M-1; i++){
 As well as the syntax for stencil functions, Ypnos provides a library of
 primitive operations. The primitives can be combined to create complex
 accelerated computations over grids. The main primitive in Ypnos is \emph{run}
-(see Listing~\ref{lst:run-red}), which applies the stencil computation to a
+(see \autoref{lst:run-red}), which applies the stencil computation to a
 grid.
 
 \begin{hflisting}[label={lst:run-red}, caption={The basic \texttt{run},
@@ -680,12 +679,12 @@ boundary that I have tacitly assumed to be default in my implementation.
 
 Another vital primitive of the Ypnos language is the \emph{reduce} primitive
 whose purpose is to summarise the contents of a grid in one value (see
-Listing~\ref{lst:run-red}). It may be used to compute functions such as the mean,
+\autoref{lst:run-red}). It may be used to compute functions such as the mean,
 sum or minimum/maximum.
 
 The primitive uses an associative operator (of type \texttt{a -> a -> a}) to
 combine all the elements of the grid to one value. A more general version of
-this operator, \emph{reduceR}, also exists (see Listing~\ref{lst:run-red}),
+this operator, \emph{reduceR}, also exists (see \autoref{lst:run-red}),
 which supports an intermediary type (or partial value).
 
 The \emph{Reducer} data type takes the following parameters:
@@ -709,12 +708,6 @@ in terms of reduceR and so the latter is the more general.
 \section{Introduction to Accelerate}
 \label{sec:intr-axle}
 
-\begin{wrapfigure}{O}{0.5\textwidth}
-  \includegraphics[width=0.5\textwidth]{figs/copyonoff.pdf}
-  \caption{An illustration of copy-on and copy-off times.  }
-  \label{fig:copyonoff}
-\end{wrapfigure}
-
 We have already mentioned Accelerate as one of the implementors of stencil
 convolution. In fact, Accelerate is an excellent target for intermediary code
 compilation. While the stencil semantics of Accelerate and Ypnos differ in some
@@ -733,7 +726,13 @@ For a process on the CPU to execute a CUDA program it must first send
 the program and the data to the GPU. When the result is ready it must be copied
 back into the main memory of the process concerned. I will call these two
 procedure \emph{copy-on} and \emph{copy-off} respectively (see
-Figure~\ref{fig:copyonoff})\todo{Ensure this figure is in the right place.}.
+\autoref{fig:copyonoff}).
+
+\begin{figure}[tb]
+  \includegraphics[width=\textwidth]{figs/copyonoff.pdf}
+  \caption{An illustration of copy-on and copy-off times.  }
+  \label{fig:copyonoff}
+\end{figure}
 
 Accelerate represents this difference in the type system. The \texttt{Acc} type
 denotes an operation on the GPU. For the purposes of Accelerate, the only
@@ -749,7 +748,7 @@ responsible for the run-time compilation and actual data transfer. All other
 operations build an abstract syntax tree (AST) to be compiled by the
 \texttt{run} primitive. Together \texttt{use} and \texttt{run} form the
 constructors and destructors of the \texttt{Acc} data type (see
-Listing~\ref{lst:runuse}).
+\autoref{lst:runuse}).
 
 \begin{hflisting}[label={lst:runuse}, caption=The basic constructors and
   destructors for moving arrays too and from the GPU in Accelerate.]
@@ -784,18 +783,18 @@ provides instances of \texttt{Exp a} for most common classes.
 
 For example, to support addition, subtraction and other numerical operations,
 Accelerate provides an instance of the type class \texttt{Num}. This means that
-operations can be typed as shown in Listing~\ref{lst:num}.
+operations can be typed as shown in \autoref{lst:num}.
 
-\begin{hflisting}[label={lst:num}, caption=The type of addition overloaded by Accelerate.]
+\begin{hlisting}[label={lst:num}, caption=The type of addition overloaded by Accelerate.]
 (+) :: Exp a -> Exp a -> Exp a
 1 + 2 + 3 :: Exp Integer
-\end{hflisting}
+\end{hlisting}
 
 \subsection{Stencil Support}
 
 Whilst \texttt{map} for an array applies a scalar function to every element in
 an array, Accelerate provides support for running stencil computations via the
-\texttt{stencil} function (see Listing~\ref{lst:sten}).
+\texttt{stencil} function (see \autoref{lst:sten}).
 
 \begin{hflisting}[label={lst:sten}, caption={The type of the stencil application
   function in Accelerate. Including an example instance of the
@@ -823,7 +822,7 @@ specified. One of the types allowed is \texttt{Mirror} (see
 
 With these two parameters we have defined an operation which performs the
 stencil convolution. An example stencil function is given in
-Listing~\ref{lst:ypsten}.
+\autoref{lst:ypsten}.
 
 \begin{hlisting}[label={lst:ypsten}, caption={The ``average'' stencil defined
   using Accelerate's syntax.}]
@@ -865,27 +864,28 @@ system.
 \section{Iterative Development}
 
 The iterative development approach was followed throughout the implementation of
-this project. Table~\ref{tbl:iter} describes the phases of development: each
+this project. \autoref{tbl:iter} describes the phases of development: each
 phase consisted of a working code prototype and a small usability evaluation. In
 the following sections I will describe each approach taken in more detail.
 
 \begin{table}
-\begin{tabular}{l l | p{10cm}}
+\begin{tabular}{l l | p{11cm}}
+  \hline
   Phase 1 & Motivation & Create a working translation and run primitive using Accelerate.\\
-  & Produced & The non-unifying approach to primitives and compile time approach to stencil translation with centring (\autoref{sec:non-unify-appr} and \autoref{sec:typesysapproach}).
+  & Produced & The non-unifying approach to primitives and compile time approach to stencil translation with centring (\autoref{sec:non-unify-appr} and \autoref{sec:typesysapp}).
   \\
   Phase 2 & Motivation & Reduce the code changes the programmer must perform and unify the CPU and GPU run primitives.\\
-  & Produced & The run and reduce primitives using type class parameters (Listing~\ref{lst:redgrid})
+  & Produced & The run and reduce primitives using type class parameters (\autoref{lst:redgrid})
   \\
   Phase 3 & Motivation & Make the return type of the reducer more useful to the user.\\
-  & Produced & The run and reduce primitives using data families (Listing~\ref{lst:rundatafam}).
+  & Produced & The run and reduce primitives using data families (\autoref{lst:rundatafam}).
   \\
   Phase 4 & Motivation & Remove the need for the programmer to change many constructors when switching.\\
-  & Produced & The final approach using a combination of type synonym families and type class parameters (Section~\ref{sec:final}).
+  & Produced & The final approach using a combination of type synonym families and type class parameters (\autoref{sec:final}).\\
+  \hline
 \end{tabular}
 \caption{The phase of iterative development in this project: for each cycle the motivation and work produced is described. \label{tbl:iter}}
 \end{table}
-\todo{top bottom lines, make wider}
 
 \section{Stencil Compilation}
 
@@ -894,10 +894,10 @@ syntax is compiled down to Haskell AST to be run. Accelerate's implementation
 has overridden much of the Haskell operators required for this translation
 stage, so the bulk of the effort went into producing the functions that contain
 the stencil computations. These functions take the form of
-Listing~\ref{lst:ypsten}
+\autoref{lst:ypsten}
 
 The arguments are formed as tuples of tuples. The rest of the stencil is normal
-Haskell code. However, the return type, \texttt{Exp a}, insures that all the
+Haskell code. However, the return type, \texttt{Exp a}, ensures that all the
 operations actually use Accelerate's overridden methods to build an AST. The AST
 is then translated at run-time into CUDA code.
 
@@ -909,9 +909,9 @@ quasiquoter is to provide an abbreviation for entering the AST manually.
 
 Take, for example, the situation in which we want to write an embedded
 language to act as a calculator. We have the AST for our
-simple calculator in Listing~\ref{lst:calc}.
+simple calculator in \autoref{lst:calc}.
 
-\begin{hflisting}[label={lst:calc}, caption={A simple calculator defined using an
+\begin{hlisting}[label={lst:calc}, caption={A simple calculator defined using an
   AST (\texttt{Expr}) and using a quasiquoter for abbreviated syntax. The definition of
   \texttt{expr} is omitted.}]
 data Expr  =  IntExpr Integer
@@ -919,7 +919,7 @@ data Expr  =  IntExpr Integer
 
 e1 = BinopExpr (+) (IntExpr 1) (IntExpr 3)
 e2 = [expr| 1 + 3 |]
-\end{hflisting}
+\end{hlisting}
 
 We see that the quasiquoter \texttt{expr} allows us to abbreviate the expression
 \texttt{e1} to the more obvious form of \texttt{e2}.
@@ -940,7 +940,7 @@ translated to Accelerate stencils by padding the stencil passed to Accelerate
 such that the cursor is centred.
 
 Take an example: assume a one dimensional stencil with the cursor at an
-off-centre location (denoted by \texttt{c}) -- Figure~\ref{fig:cursor}.
+off-centre location (denoted by \texttt{c}) -- \autoref{fig:cursor}.
 
 \begin{figure}
   \centering
@@ -969,7 +969,7 @@ by the following two equations:
 
 \[ pad_{end} = max \{a, b-a-1\} - (b - a - 1) \]
 
-This means that after centring we get Figure~\ref{fig:centredcursor}
+This means that after centring we get \autoref{fig:centredcursor}
 
 In order to implement the centring I had to consider both the one and two
 dimensional cases.  It would be quite easy to deal with this in two separate
@@ -977,14 +977,14 @@ cases, except it must be possible to extend the approach to higher dimensions. I
 considered three principle approaches to doing this: using lists as
 intermediaries; using arrays as intermediaries; or operating on the grid
 patterns directly via type classes.  Before addressing the approaches I will
-mention the types in question (see Listing~\ref{lst:gridpattern}).
+mention the types in question (see \autoref{lst:gridpattern}).
 
-\begin{hflisting}[label={lst:gridpattern}, caption=The data type which stores
+\begin{hlisting}[label={lst:gridpattern}, caption=The data type which stores
   the grid patterns in Ypnos. Notice that the dimensionality is not exposed in
   the type but hidden.]
 data GridPattern = GridPattern1D DimTag [VarP] |
                    GridPattern2D DimTag DimTag [[VarP]]
-\end{hflisting}
+\end{hlisting}
 
 \texttt{GridPattern} is the type in the Ypnos AST corresponding to the parsed
 pattern of arguments. We see that it takes both a 1D and 2D form where the
@@ -1010,21 +1010,20 @@ A type class is declared in two parts: interface and instance. An interface has
 a number of type parameters (also called indices) and function type
 declarations. It is then possible to declare which types are instances of which
 class. This is done by providing concrete types for the indices and concrete
-definitions for the functions. Listing \ref{lst:typeclass} gives an example of a
+definitions for the functions. \autoref{lst:typeclass} gives an example of a
 type class declaration and instance.
 
-\begin{hflisting}[label=lst:typeclass, caption={An example type class for
+\begin{hlisting}[label=lst:typeclass, caption={An example type class for
     equality. Showing the declaration and the instance for integers. Where
     \texttt{integerEq} is the implementation of integer equality on the target
     machine.}]
-
 class Eq a where
   (==) :: a -> a -> Bool
 
 instance Eq Integer where
   x == y =  x `integerEq` y
 
-\end{hflisting}
+\end{hlisting}
 
 \subsubsection{Type Families}
 \label{sec:typefam}
@@ -1041,35 +1040,30 @@ and defines how many type arguments are taken.
 Type families come in two flavours: data families and type synonym families. The
 former allows the data type to be declared differently for different indexes,
 whereas the latter allows different types to be synonymous.
-Listing~\ref{lst:datafam} gives an example a data family being used to expose
+\autoref{lst:datafam} gives an example of a data family being used to expose
 the dimensionality of a pattern. This allows for the use of ad-hoc polymorphism
 later on.
+
+\begin{hlisting}[label=lst:datafam, caption=The data family declares tw<
+  different constructors for 1D and 2D lists. The dimensionality of the list is
+  exposed in the type.]
+data family GridPatt :: * -> * -> *
+data instance GridPatt (Int) a     = GridPatt1D Int [a]
+data instance GridPatt (Int,Int) a = GridPatt2D (Int, Int) [[a]]
+\end{hlisting}
 
 Both flavours can be associated with a type class. In this case the index of the
 type class must form part of the index of the type family. The interface and
 instance declarations of the type family are bound to the corresponding
-declarations of the type class. Listing~\ref{lst:assoctypefam} gives an example
+declarations of the type class. \autoref{lst:assoctypefam} gives an example
 of an associated data family for patterns as opposed to it standing alone in
-Listing~\ref{lst:datafam}. The usage of type synonym families will be discussed
+\autoref{lst:datafam}. The usage of type synonym families will be discussed
 in detail in \autoref{sec:intr-type-class}.
 
-\begin{hflisting}[label=lst:datafam, caption=The data family declares two
-  different constructors for 1D and 2D lists. The dimensionality of the list is
-  exposed in the type.]
-
-data family GridPatt :: * -> * -> *
-data instance GridPatt (Int) a =
-    GridPatt1D Int [a]
-data instance GridPatt (Int,Int) a =
-    GridPatt2D (Int, Int) [[a]]
-
-\end{hflisting}
-
-\begin{hflisting}[label=lst:assoctypefam, caption={The data family from
-    listing~\ref{lst:datafam} has now been associated with the class
+\begin{hlisting}[label=lst:assoctypefam, caption={The data family from
+    \autoref{lst:datafam} has now been associated with the class
     \texttt{GridIx} to provide the function \texttt{size} for various
-    dimensionalities. Both }]
-
+    dimensionalities.}]
 class (Ix i, Num i, ElMax i) => GridIx i where
     data GridPatt :: * -> * -> *
     size :: GridPatt i a -> i
@@ -1077,12 +1071,11 @@ class (Ix i, Num i, ElMax i) => GridIx i where
 instance GridIx (Int) where
     data GridPatt (Int) a = GridPatt1D Int [a]
     size (GridPatt1D s _) = s
-
-\end{hflisting}
+\end{hlisting}
 
 \subsubsection{Intermediate Approaches}
 
-The first approach to centring taken involved first, converting from grid
+The first approach to centring taken involved first converting from grid
 patterns into lists, then balancing these lists, and finally converting them
 into the centred tuples needed for the Accelerate functional representation. In
 order to do this I would have to define functions for measuring the location of
@@ -1101,11 +1094,11 @@ myself. As such, the intermediary array stage was not the best choice.
 The third and final approach was to operate directly on the lists extracted from
 the \texttt{GridPattern} types. As previously mentioned, to retain
 dimensionality information in the type system a type class was required.  I
-designed a class \texttt{GridIx} (see Listing~\ref{lst:gridix}) to perform the
+designed a class \texttt{GridIx} (see \autoref{lst:gridix}) to perform the
 basic operations -- \texttt{addBefore}, \texttt{addAfter}, \texttt{find} and
 \texttt{size} -- in a dimension-sensitive way while still being polymorphic.
 
-\begin{hflisting}[label={lst:gridix}, caption=The class declaration of
+\begin{hlisting}[label={lst:gridix}, caption=The class declaration of
   \texttt{GridIx} showing the main functions defined for the grid manipulation
   and an associated data family.]
 class (Ix i, Num i, ElMax i) => GridIx i where
@@ -1114,7 +1107,7 @@ class (Ix i, Num i, ElMax i) => GridIx i where
     addAfter :: i -> a -> GridPatt i a -> GridPatt i a
     find :: (a -> Bool) -> GridPatt i a -> i
     size :: GridPatt i a -> i
-\end{hflisting}
+\end{hlisting}
 
 The associated data type \texttt{GridPatt} would take the type of the particular
 dimensionality of list that is appropriate for a given instance. In the case of
@@ -1131,17 +1124,17 @@ translation (described next).
 \label{sec:typesysapp}
 
 As we saw in the previous section, the types of the Ypnos CPU stencil and the
-Accelerate library's stencil differ wildly. Listing~\ref{lst:avgsten} shows the
+Accelerate library's stencil differ wildly. \autoref{lst:avgsten} shows the
 difference for the \texttt{avg}\footnote{For the sake of simplicity I have
   excluded the type constraints relating to boundaries as these are long
   and complicated.}  stencil.
 
-\begin{hflisting}[label={lst:avgsten}, caption={The average function implemented
+\begin{hlisting}[label={lst:avgsten}, caption={The average function implemented
     on both the CPU and GPU. Note the difference in types. The constraints are
     simplified.}]
 avgCPU :: (Array a, Floating a) => Grid (Dim X :* Dim Y) a ->     a
 avgGPU ::      Floating (Exp a) =>            Stencil3x3 a -> Exp a
-\end{hflisting}
+\end{hlisting}
 
 In the GPU case we see that the type (once expanded) is tuples of tuples of
 \texttt{Exp a}. On the other hand, in the Ypnos case we see that arguments take
@@ -1149,7 +1142,7 @@ the form of a grid, which is exactly the same type as the grids it operates on.
 
 The Ypnos grid type is a \emph{comonad}, a functional programming design pattern
 arising from Category Theory. The run primitive is an operation of the comonad,
-\texttt{cobind} (Listing~\ref{lst:cobind}).
+\texttt{cobind} (\autoref{lst:cobind}).
 
 \begin{hflisting}[label={lst:cobind}, caption={The definition of cobind. Let
     \texttt{D} be a grid of a certain dimension and \texttt{a} and \texttt{b} be
@@ -1163,7 +1156,7 @@ syntax is translated directly to a function with Accelerate type
 me in the \texttt{funGPU} quasiquoter (see \autoref{sec:usage} for usage
 examples). Advanced type-system features in Haskell are used to unify the two
 types of stencils. The pros and cons of this approach will be discussed in
-Section~\ref{sec:prims}.
+\autoref{sec:prims}.
 
 Unfortunately, by translating directly to the Accelerate stencil type we lose
 the comonadic nature of the type. This is a shame, because this type is both
@@ -1183,7 +1176,7 @@ the theoretic underpinnings of Ypnos -- the comonadic structure. In order to
 achieve this, some run-time conversions had to be done.
 
 As already seen, we would like the \texttt{run} primitive to take the
-form given in Listing~\ref{lst:run2}
+form given in \autoref{lst:run2}
 
 \begin{hflisting}[label={lst:run2}, caption=The comonadic run type. Changing the
   type of \texttt{g} could change the backend used.]
@@ -1191,36 +1184,36 @@ run :: Comonad g => (g a -> b) -> g a -> g b
 \end{hflisting}
 
 We have also seen that Accelerate does not accept stencils of this type (see
-Section~\ref{sec:typesysapp})\todo{Have we?}.  To solve this we previously broke the
+\autoref{sec:typesysapp}).  To solve this we previously broke the
 comonadicity of the operation but we could attempt to preserve it by introducing
 an \emph{arrow} data constructor to abstract the differences in type between the
 notion of a stencil function\ in Accelerate and Ypnos. This changes the run
-function to that seen in Listing~\ref{lst:runarr}.
+function to that seen in \autoref{lst:runarr}.
 
-\begin{hflisting}[label={lst:runarr}, caption=The type run is generalised to
+\begin{hlisting}[label={lst:runarr}, caption=The type run is generalised to
   using the \texttt{arrow} type.]
 run :: Comonad g => (g a `arrow` b) -> g a -> g b
-\end{hflisting}
+\end{hlisting}
 
 The \texttt{arrow} constructor is parametrized on both \texttt{g a} and
 \texttt{b}. To build up an instance of \texttt{arrow} we must pass in the
 stencil function to a special constructor. The constructor chosen decides the
 implementation used.
 
-While previously (Section~\ref{sec:typesysapp}) we had to use different versions
+While previously (\autoref{sec:typesysapp}) we had to use different versions
 of the quasiquoter to produce different stencils at compile-time, we now use the
 same quasiquoter but convert the function at run-time. We achieve this by taking
 advantage of Haskell's polymorphism which allows a function over type \texttt{a}
 to specialise to a function of type \texttt{Exp a'}. This generalisation
 combined with the arrow data constructor allows our stencil functions to have
-the type in Listing~\ref{lst:arrow-sten}
+the type in \autoref{lst:arrow-sten}
 
-\begin{hflisting}[label={lst:arrow-sten}, caption=Here we see the type the
+\begin{hlisting}[label={lst:arrow-sten}, caption=Here we see the type the
   stencil must have in Accelerate (\texttt{stencil}) and the type we can
   generalise to using the \texttt{arrow} type (\texttt{stencil'}).]
 stencil :: Comonad g => g (Exp a) -> Exp b
 stencil' :: Comonad g => g a `arrow` b
-\end{hflisting}
+\end{hlisting}
 
 Because of the arrow type, \texttt{stencil} and \texttt{stencil'} can now have
 the same type.
@@ -1247,14 +1240,14 @@ The primitives are the second core component of the port to GPU. The
 implementation of the primitives had two potential approaches: the first was to
 re-implement the primitives in a separate module (a non-unifying approach). In
 this case, the user would import whichever implementation they required. This
-approach had some drawbacks -- for example, it required the user to change too
-much of their code between implementations.
+approach had some drawbacks -- for example, it required the user to change much
+of their code between implementations.
 
 This led to the second approach of extracting the functionality of the primitive
-into a type class (a type class approach). This approach required the use of
-some complicated type features in order to make the types unify. This lead to a
-further three possibilities: (a) using a type class parameter for unification,
-(b) associating a type family and (c) associating a data type.
+into a type class. This solution required the use of some complicated type
+features in order to make the types unify. This lead to a further three
+possibilities: (a) using a type class parameter for unification, (b) associating
+a type family and (c) associating a data type.
 
 The resultant approach was a hybrid of these. In this section I will detail all
 the approaches taken and at the end of this section I will discuss the
@@ -1287,7 +1280,7 @@ of the \texttt{reduce} primitive was never implemented.
 \subsection{Introducing Type Classes}
 \label{sec:intr-type-class}
 
-In this project I am aiming both to make an accurate and fast translation as
+In this project I am aiming to make both an accurate and fast translation as
 well as one which is easy for the programmer to use.  With the previous approach
 we saw how this did not work for two reasons: (a) the run primitive I
 implemented was not related (as far as Haskell was concerned) to the original
@@ -1304,7 +1297,7 @@ different grid types for different backends.
 We have seen this before: in some of the code examples I have used the notation
 ``Comonad g'' to refer to a grid which implements the primitives of Ypnos. This
 was a type class approach. However, we run into the same problems as with
-stencil translation (see Section~\ref{sec:runtimetrans}), namely the types of
+stencil translation (see \autoref{sec:runtimetrans}), namely the types of
 stencil required by Accelerate and Ypnos differ.
 
 \subsubsection{Type Class Parameter}
@@ -1341,7 +1334,7 @@ The approach taken in Phase 2 to reconciling the stencil uses Haskell type
 classes parametrized by more than one type. This allows us to abstract over
 parts of the type that change to give a unified type. As the reduce primitive
 was the first to bring about such issues, let's examine how this approach can be
-applied to it (see Listing~\ref{lst:redgrid}).
+applied to it (see \autoref{lst:redgrid}).
 
 In this approach we are able to have instances for \texttt{Reducer} for the CPU
 and GPU based on the grid type yet we also change the types of values accepted
@@ -1358,14 +1351,14 @@ given example.
 
 Unlike the \texttt{reduceG} example, Haskell cannot, without help from the
 programmer, choose a different quasiquoter (as is required with the static
-approach as seen in Section~\ref{sec:typesysapp}).
+approach as seen in \autoref{sec:typesysapp}).
 
 \needspace{3\baselineskip}
 In theory, this approach should work, however, it brings some usability
 problems. Let's further examine the type of the \texttt{reduceG} primitive
-when applied to \texttt{GPUGrid}s (see Listing~\ref{lst:redgpu})
+when applied to \texttt{GPUGrid}s (see \autoref{lst:redgpu})
 
-\begin{hlisting}[label={lst:redgpu}, caption={The type of the reducer once the
+\begin{hflisting}[label={lst:redgpu}, caption={The type of the reducer once the
     Accelerate types are applied.}]
 Reducer :: (Exp a -> Exp b -> Exp b)
         -> (Exp b -> Exp b -> Exp b)
@@ -1375,7 +1368,7 @@ Reducer :: (Exp a -> Exp b -> Exp b)
 reduceG :: Reducer (Exp a) (Exp b) (Exp c)
         -> GPUGrid
         -> Exp c -- Return value
-\end{hlisting}
+\end{hflisting}
 
 Notice that both the return value and default value of the reducer have type
 \texttt{Exp}, which is problematic, as \emph{lifting} and
@@ -1390,9 +1383,9 @@ than the values. However, the approach taken next offers greater flexibility.
 \label{sec:assoctypefam}
 
 We already encountered associated type families in
-Section~\ref{sec:typefam}. Here we will be using type synonym families as
+\autoref{sec:typefam}. Here we will be using type synonym families as
 opposed to data families (Phase 4). These allow the unification of the different
-function types required (see Listing~\ref{lst:typesynfam} for an example of type
+function types required (see \autoref{lst:typesynfam} for an example of type
 synonyms families unifying different function types).
 
 \begin{hflisting}[label=lst:typesynfam, caption=The type synonym family is used
@@ -1408,7 +1401,7 @@ type instance Fun GPUGrid a b = (Exp a -> Exp b)
 
 \needspace{7\baselineskip}
 The ideal type for the \texttt{Reducer} in the GPU implementation is given in
-Listing~\ref{lst:reduceideal}
+\autoref{lst:reduceideal}
 
 \begin{hlisting}[label={lst:reduceideal}, caption={The optimal type for the
     reduce primitive under Accelerate.}]
@@ -1427,7 +1420,7 @@ This make the default easier to provide and result easier to use. By examining
 this we can deduce that there are actually two types of abstract function
 involved: 1- and 2-argument functions of \texttt{Exp}s. If we implement these as
 two associated type families we get the behaviour required (see
-Listing~\ref{lst:redtypefam})
+\autoref{lst:redtypefam})
 
 \begin{hlisting}[label={lst:redtypefam}, caption={The application of type
     families to the reduce primitive.}]
@@ -1449,8 +1442,8 @@ do not simply have a conversion of types, but also conditions on those types
 family method using a Haskell language extension called
 \emph{ConstraintKinds}. This allows us to define a type family which has the
 \emph{kind} of \texttt{Constraint} instead of the usual \texttt{*} (denoting
-type as seen in Section~\ref{sec:typefam}). An example of the \texttt{RunGrid}
-class modified in this way is given in Listing~\ref{lst:constkind}.
+type as seen in \autoref{sec:typefam}). An example of the \texttt{RunGrid}
+class modified in this way is given in \autoref{lst:constkind}.
 
 \begin{hlisting}[label={lst:constkind}, caption={The application of type
     families to the run primitive.}]
@@ -1468,7 +1461,7 @@ As we see, using associated type families is not general because we are exposing
 \texttt{sten} -- a type variable which has no relevance to the CPU
 implementation. Though it can be safely ignored, it exposes too much of the
 underlying type difference which we are coding against and so does not decouple
-the two implementations. As we will see in Section~\ref{sec:final}, this problem
+the two implementations. As we will see in \autoref{sec:final}, this problem
 can be mitigated by taking a hybrid approach.
 
 \subsubsection{Associated data families}
@@ -1480,9 +1473,9 @@ associated data families (see \autoref{sec:typefam}). These work in much the
 same way as type families, but rather than binding a particular synonym to a
 class we bind a data type definition.
 
-Listing~\ref{lst:rundatafam} shows the \texttt{RunGrid} type class defined using
+\autoref{lst:rundatafam} shows the \texttt{RunGrid} type class defined using
 data families. We can see that the data family has replaced both the type and
-constraint families from Section~\ref{sec:assoctypefam}.
+constraint families from \autoref{sec:assoctypefam}.
 
 \begin{hflisting}[label=lst:rundatafam,
 caption=RunGrid with associated data family.]
@@ -1534,24 +1527,24 @@ type parameter for the \texttt{arrow} type\footnote{This is effectively the same
   as having used an associated data type, except a type synonym could be
   passed.} in the \texttt{RunGrid} class with associated type families for
 constraints and generalized functions in the \texttt{ReduceGrid} class (see
-Listing~\ref{lst:final}).
+\autoref{lst:final}).
 
 The \texttt{RunGrid} class makes use of functional dependencies to ensure that
 the \texttt{arrow} constructor the programmer specifies fully determines the
 grid implmentation to be used. When using generalised constructors and
-destructors (Section~\ref{sec:usage}) this means that if the programmer is
+destructors (\autoref{sec:usage}) this means that if the programmer is
 building their grids from lists then the correct implementation's grid will be
 decided based on the \texttt{arrow} type used.
 
 By using a type and not type synonyms for the stencil function I have eliminated
 the need to expose a type variable in the declaration for type synonyms (as seen
-in Section~\ref{sec:assoctypefam}). Now this can be neatly encapsulated within a
+in \autoref{sec:assoctypefam}). Now this can be neatly encapsulated within a
 GADT.
 
 \section{Usage}
 \label{sec:usage}
 
-The examples in Listing~\ref{lst:example} are taken directly from the unit tests
+The examples in \autoref{lst:example} are taken directly from the unit tests
 for the application. They show the usage of the generalized constructors as well
 as the \texttt{run} and \texttt{reduce} primitives. As we can see the user
 doesn't have to deal with any of the types we mentioned previously.
@@ -1571,28 +1564,36 @@ runF sten xs (x, y) = gridData (runG sten xs')
                          (cycle xs)
                          mirror
 
--- The average stencil
-avgY = [funGPU| X*Y:|a  b c|
-                    |d @e f|
-                    |g  h i| ->
+-- The average stencil for GPU
+avgGPU = [funGPU| X*Y:|a  b c|
+                      |d @e f|
+                      |g  h i| ->
         (a + b + c + d + e + f + g + h + i)/9|]
 
--- Run the average function on the CPU
-runAvgGPU = runF (GPUArr avgY)
+-- The average stencil for CPU
+avgCPU = [funCPU| X*Y:|a  b c|
+                      |d @e f|
+                      |g  h i| ->
+        (a + b + c + d + e + f + g + h + i)/9|]
 
 -- Run the average function on the GPU
-runAvgCPU = runF (CPUArr avgY)
+runAvgGPU = runF (GPUArr avgGPU)
+
+-- Run the average function on the CPU
+runAvgCPU = runF (CPUArr avgCPU)
 
 \end{hflisting}
 
 \section{Summary}
 
-Recall from Section~\ref{sec:introduction-ypnos} that Ypnos is a collection of
-syntax extensions and a library of primitives. On top of the previously existing
+Recall from \autoref{sec:introduction-ypnos} that Ypnos is a collection of
+syntax extensions and a library of primitives. On top of the previous
 implementation, this project implemented: changes to the syntax extensions to
 allow the generation of GPU stencils (by implementing the \texttt{funGPU}
 quasiquoter), library generalisation and API refinement, a re-factoring of CPU
-primitives to fit the new API, and a set of new GPU primitives.
+primitives to fit the new API, and a set of new GPU primitives. See
+\autoref{fig:files} for a complete summary of the changes introduced by this
+project.
 
 This chapter outlined: stencil compilation and the primitive implementation
 (reduce and run). Stencil compilation was attempted in a compile-time and
@@ -1605,30 +1606,110 @@ I described the final approach chosen. The chapter is rounded off with a brief
 usage example for the translation, primitives, constructors and
 destructors.
 
+\begin{figure}[p]
+\tikzstyle{every node}=[draw=black,thick,anchor=west]
+\tikzstyle{created}=[draw=green,fill=green!30]
+\tikzstyle{modified}=[draw=yellow,fill=yellow!30]
+\begin{tikzpicture}[%
+  grow via three points={one child at (0.5,-0.7) and
+  two children at (0.5,-0.7) and (0.5,-1.4)},
+  edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+  \node {ypnos}
+  child { node [created] {ypnos.cabal -- build file}}
+  child { node [created] {benchmarks}
+    child { node [created] {Benchmark.hs -- benchmark harness}}
+    child { node [created] {Makefile}}
+    child { node [created] {plot.py -- plotting functions}}
+  }
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child { node [] {src}
+    child { node [] {Ypnos}
+      child { node [modified] {Core -- modified to provide unifying types}
+        child { node [] {Boundary.lhs}}
+        child { node [modified] {Combinators.lhs}}
+        child { node [] {Dimensions.lhs}}
+        child { node [modified] {Grid.lhs}}
+        child { node [] {Types.lhs}}
+      }
+      child [missing] {}
+      child [missing] {}
+      child [missing] {}
+      child [missing] {}
+      child [missing] {}
+      child { node [created] {CUDA/Expr -- the core contribution}
+        child { node [created] {Combinators.hs -- primitives}}
+        child { node [created] {Fun.hs -- stencil translation}}
+      }
+      child [missing] {}
+      child [missing] {}
+      child { node [created] {Examples -- used for testing.}
+        child { node [created] {Reductions.hs}}
+        child { node [created] {Stencils.hs}}
+      }
+      child [missing] {}
+      child [missing] {}
+      child { node [modified] {Expr}
+        child { node [] {Boundary.lhs}}
+        child { node [] {Expr.lhs}}
+        child { node [modified] {Fun.lhs}}
+      }
+    }
+  }
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child [missing] {}
+  child { node [created] {testsuite}
+    child { node [created] {Test.hs}}
+    child { node [created] {Testing/Ypnos/CUDA/Expr -- tests for all functionality implemented}
+      child { node [created] {Combinators.hs}}
+      child { node [created] {Fun.hs}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child { node [created] {UnitTest.hs}}
+  };
+
+\end{tikzpicture}
+\caption{The file tree of the final Ypnos project showing all work done. White
+  files are unchanged from the original implementation. Green files are
+  completely new and created by me. Yellow files were modified from the
+  original.}
+\label{fig:files}
+\end{figure}
+
 \chapter{Evaluation}
 \label{chap:evaluation}
 
 The main aims of this project were to produce a correct translation and speed up
-over the CPU implementation (see Section~\ref{sec:reqanal}). In order to test
+over the CPU implementation (see \autoref{sec:reqanal}). In order to test
 these two goals I have implemented unit tests throughout the course of this
-project and implemented an evaluation suite of programs. The GPU is a type of
-co-processor and, as a result, incurs an overhead for copying results to and
-from its local memory. In evaluating the speed up of using the GPU I have
-discounted this.\todo{Why have I discounted? ref?}
+project and implemented an evaluation suite of programs.
 
-Further to the performance evaluations, in this section I will also discuss the
-measures taken to ensure a correct translation. At the end of the chapter I will
-highlight the usability evaluation conducted using the method of \emph{cognitive
-  dimensions}.
+This section discusses the performance evaluation and measures taken to ensure a
+correct translation. At the end of the chapter I will highlight the usability
+evaluation conducted using the method of \emph{cognitive dimensions}.
 
 \section{Performance}
 
 Before the evaluation I postulated that the GPU should provide a speed up over
-the CPU due to its capacity for parallel computation. Seeing as the stencil
-computation is highly data parallel, it is a perfect fit for the SIMD
-parallelism of the GPU. More specifically, I expected that as grid sizes
-increased the run time of the computation would scale better in the GPU case
-compared with the CPU case due to the hardware acceleration.
+the CPU due to its capacity for parallel computation. More specifically, I
+expected better scaling in the GPU case compared with the CPU.
 
 \subsection{Methodology}
 
@@ -1675,7 +1756,7 @@ and from the GPU\footnote{Though this is an important factor when considering
 done via an \texttt{identity} function implemented in Accelerate. The identity
 function works by copying the data from the CPU to the GPU, performing no
 operations on the GPU, then copying the data back. This will allow us to have a
-base measure of how fast our computations could be without this overhead.
+base measure of how fast our computations run without overhead.
 
 \subsection{Benchmark suite}
 
@@ -1686,16 +1767,17 @@ functions include:
 
 \begin{itemize}
 \itemsep1pt\parskip0pt\parsep0pt
-\item \textbf{The Average Stencil} (5-point version) \todo{Reference avg
-    stencil} that we have seen in the previous sections. This function is
-  representative of convolution style operations which we may wish to perform on
-  the data. It operates over floating point numbers which is a common use case
-  for scientific computing.
-\item \textbf{The Game of Life Stencil}\todo{Put code in appendices} makes use
+\item \textbf{The Average Stencil} (5-point version, \autoref{lst:example}) that
+  we have seen in the previous sections. This function is representative of
+  convolution style operations which we may wish to perform on the data. It
+  operates over floating point numbers which is a common use case for scientific
+  computing.
+\item \textbf{The Game of Life Stencil} (\autoref{chap:life}) makes use
   of various boolean functions as well as (externally declared) functions used
   to count the number of \emph{true} values in a list.
-\item \textbf{The Total Reducer}\todo{Reference} when normalised gives the mean
-  which constitute one of the most common reduction operations over grids.
+\item \textbf{The Total Reducer} (\autoref{lst:example}) when normalised gives
+  the mean which constitute one of the most common reduction operations over
+  grids.
 \end{itemize}
 
 \subsection{Results}
@@ -1736,26 +1818,25 @@ the CPU for grids of size greater than $30 \times 30$. This is in accordance
 with the expected outcome, that the GPU is able to perform better modulo copy
 on/off times.
 
-On a scale of 0-100 (see Figure~\ref{fig:runperf100}), the slowdown of the GPU
+On a scale of 0-100 (see \autoref{fig:runperf100}), the slowdown of the GPU
 is barely visible above random variation. However, on a greater scale
-(Figure~\ref{fig:runperf1000}) it is clear that there is an increase in run
+(\autoref{fig:runperf1000}) it is clear that there is an increase in run
 time.
 
-The base measurement is the copy on/off time. My implementation, by its very
-nature, incurs such a cost due to copying the data to and from the GPU. We see
-that on the smaller scale of analysis the base and actual stencils show little
-difference in performance signifying that most of the time is spent in copying
-(between 20-50\% depending on the stencil). On the greater scale we see how the
-stencil computations actually diverge from the base as GPU computation time
-starts to become significant. This can be seen more clearly in
-Figure~\ref{fig:runperf1000dis} where the copy on/off time has been discounted.
+The base measurement is the copy on/off time. We see that on the smaller scale
+of analysis the base and actual stencils show little difference in performance
+signifying that most of the time is spent in copying (between 20-50\% depending
+on the stencil). On the greater scale we see how the stencil computations
+actually diverge from the base as GPU computation time starts to become
+significant. This can be seen more clearly in \autoref{fig:runperf1000dis}
+where the copy on/off time has been discounted.
 
-From the graphs it is clear to see that copy on/off time does not account for
-all the overhead in the GPU computation. I hypothesise that this is due to a
-copy on/off time for code as well as data (which was not accounted for in my
+From the graphs we see that copy on/off time does not account for all the
+overhead in the GPU computation. I hypothesise that this is due to a copy on/off
+time for code as well as data (which was not accounted for in my
 calculations). This is supported by the fact that the Game of Life has a greater
-overhead at zero than the average function, because the implementation was more
-complex and greater code size.
+overhead at zero than the average function, because the implementation has
+greater code size.
 
 \subsubsection{Reduce}
 
@@ -1767,13 +1848,10 @@ complex and greater code size.
   \label{fig:reduceperf}
 \end{figure}
 
-As we can see from Figure~\ref{fig:reduceperf}, the performance of the reduce
-primitive on the GPU also exceeds that of the CPU. In this case, however, the
-cross-over happens latter because the performance of the CPU is already quite
-acceptable. This is consequence of the fact that the reduction calculations are
-much less intensive than those of the stencil function or the Game of Life.
-
-In this case we see a cross-over happening at around the $80 \times 80$ grid size.
+As we can see from \autoref{fig:reduceperf}, the performance of the reduce
+primitive on the GPU also exceeds that of the CPU at $80\times80$ grid
+size. This is a consequence of the fact that the reduction calculations are much
+less intensive than those of the stencil function or the Game of Life.
 
 \subsection{Deducing a model}
 
@@ -1782,8 +1860,8 @@ workload is best suited to the CPU or GPU. The experiments in this section have
 already given us an insight into this: once grid size goes beyond a certain
 size, the GPU should be used. We also saw that the complexity of the program
 contributes to both the overhead and the scalability. However, at small values
-of grid size the overhead is most significant and so the degradation can be
-ignored.
+of grid size the overhead of the GPU is most significant and so the degradation
+can be ignored.
 
 In order to deduce a model which could be used for switching between CPU and GPU
 we must determine (a) an approximation function for the CPU's scalability, which
@@ -1791,37 +1869,31 @@ is mostly dependent on the grid size and (b) the overhead particular to our
 program on the GPU, which depends on compiled code size as well as the grid
 size. We will ignore (b) seeing as the evaluation was not sufficient to
 determine this. (a) can be found by fitting a quadratic to the curve. This has
-been done in Figure~\ref{fig:fitting} and we can see that the quadratic
+been done in \autoref{fig:fitting} and we can see that the quadratic
 polynomial fits almost perfectly. The coefficients of this polynomial are given
 by~\autoref{eq:quad}
 
 \begin{equation} \label{eq:quad}
 y = a x^2 + b x + c
 \end{equation}
-In this equation we can interpret $c$ as being the overhead. The coefficients
-are:
+In this equation we can interpret $c$ as being the overhead for the CPU. The
+coefficients are:
 \begin{align*}
 a & = & 3.23223432 \times 10^{-6}\\
 b & = & -9.23861372 \times 10^{-6}\\
 c & = & 1.56150424 \times 10^{-4}\\
 \end{align*}
 
-Knowing the particular overhead of our function (as we have assumed) we are now
-able to use equation~\ref{eq:quad} to calculate the grid size, $x$, for which we
-should switch to using the GPU. Solving for $x$ we get equation~\ref{eq:quadx}
-
-\begin{equation} \label{eq:quadx}
-x = \frac{\sqrt{(-4 a c+4 a y+b^2)-b}}{2 a}
-\end{equation}
-
-We set $y$ to the run time of the GPU operation (which we assumed is
-constant). Take $y=1.54 \times 10^{-3}$, as is the case for the average stencil,
-then we get the resultant switching grid size $x=22.17$ which agrees with the
-graph in Figure~\ref{fig:runperf100}.
+Knowing the particular overhead of our function, y, (as we have assumed) we are
+now able to use \autoref{eq:quad} to calculate the grid size, $x$, for
+which we should switch to using the GPU. We set $y$ to the run time of the GPU
+operation (which we assumed is constant). Take $y=1.54 \times 10^{-3}$, as is
+the case for the average stencil, then we get the resultant switching grid size
+$x=22.17$ which agrees with the graph in \autoref{fig:runperf100}.
 
 \begin{figure}[h]
   \includegraphics[width=\textwidth]{figs/run_performance_fit.pdf}
-  \caption{Least square fitting of a linear and quadratic curve to the
+  \caption{Least square error fitting of a linear and quadratic curve to the
     performance data for the CPU implementation of the average function.}
   \label{fig:fitting}
 \end{figure}
@@ -1832,8 +1904,8 @@ graph in Figure~\ref{fig:runperf100}.
 A central goal of the project was to produce a correct translation from Ypnos to
 Accelerate. Already, by choosing a type safe language such as Haskell I vastly
 reduced the number of run-time errors. To catch the rest I made use of
-\emph{unit testing} and \emph{Test Driven Development} (TDD)
-(\autoref{sec:tdd}). Clearly, unit testing can only provide a partial assurance
+\emph{unit testing} and \emph{Test Driven Development} (TDD,
+\autoref{sec:tdd}). Clearly, unit testing can only provide a partial assurance
 of correctness and not a guarantee. However, I decided that a formal proof
 (which could give these guarantees) was beyond the scope of this project. In
 writing these tests I have assumed that the original CPU implementation was
@@ -1875,7 +1947,7 @@ transformation:
   Centres the cursor, given the original grid had a cursor.
 \item
   Both roffset and coffset are always positive on such a grid (see
-  Section~\ref{sec:centring} for an explanation of these two values).
+  \autoref{sec:centring} for an explanation of these two values).
 \end{itemize}
 
 The assumption was that grid patterns given to the transformation procedures
@@ -1991,7 +2063,7 @@ two use cases: converting between GPU and CPU.
 The cognitive dimensions relevant to this task are:
 
 \begin{tabular}{p{0.35\textwidth} p{0.6\textwidth}}
-  Low repetition viscosity & to allow the user to easily change the
+  Low repetition viscosity & to allow the programmer to easily change the
   implementation without changing too many points in code.
   \\
   Little to no imposed lookahead & allowing the programmer to use one
@@ -2003,24 +2075,24 @@ The cognitive dimensions relevant to this task are:
   Terseness & the syntax to specify the implementation does not get in the
   way of coding the stencils.
   \\
-  Closeness of mapping & the model presented to the user through the API should
-  map well to the user's mental model for these types of
-  operation, e.g. comonadic operations.
+  Closeness of mapping & the model presented to the programmer through the API
+  should map well to their mental model for these types of operation,
+  e.g. comonadic operations.
   \\
 \end{tabular}
 
 The various approaches to provide an API to the programmer were discussed in the
-\autoref{chap:impl}). They essentially boiled down to the following three
+\autoref{chap:impl}. They essentially boiled down to the following three
 approaches: choosing the different implementation based on importing (also
-called the non-unifying approach, see Section~\ref{sec:non-unify-appr}), using
-type classes with associated data families (Section~\ref{sec:assoc-data-fam})
+called the non-unifying approach, see \autoref{sec:non-unify-appr}), using
+type classes with associated data families (\autoref{sec:assoc-data-fam})
 and using type classes with associated type families
-(Sections~\ref{sec:assoctypefam} and \ref{sec:final}). For the sake of
+(\autoref{sec:assoctypefam} and \autoref{sec:final}). For the sake of
 comparison I will also include the approach of the programmer re-coding their
 implementation in Accelerate for the GPU.
 
 The results of the evaluation are briefly summarised in
-Table~\ref{tbl:cogcompbrief}, for a full discussion see Table~\ref{tbl:cogcomp}
+\autoref{tbl:cogcompbrief}, for a full discussion see \autoref{tbl:cogcomp}
 in the Appendix. An informal usability analysis such as this one was performed
 at the end of each iterative development phase in order to inform the next
 prototype.
@@ -2061,7 +2133,7 @@ Closeness of mapping & \textbf{Best} & \textbf{Worst} & \textbf{Worst} &
   dimensions. \label{tbl:cogcompbrief}}
 \end{longtable}
 
-\subsection{Conclusions}
+\subsection{Discussion of Usability}
 
 As we now can see, the best approach for our users is that of associated type
 families with the data constructor for the stencil function. This approach is
@@ -2072,7 +2144,7 @@ abstraction and closeness of mapping.
 The \emph{hidden dependency} problems are mitigated by the Haskell compiler
 which warns and throws errors when there is a conflict in these dependencies,
 e.g. if the user uses different \texttt{Sten} type constructors on the same grid
-(see Listing~\ref{lst:stendatafam}). While a little increase in hidden
+(see \autoref{lst:stendatafam}). While a little increase in hidden
 dependencies is necessary to reduce viscosity, there could be room for
 improvement here by making the types more consistent. This would help us remove
 the dependencies due to the changing types and constraints.
@@ -2117,10 +2189,10 @@ originally stated.
 
 During this project I have learnt a large number of new and complicated
 technologies from a field of computer science previously unknown to me. Having
-only experienced the ML programming from part Ia, diving into Haskell's
-intricate type system has been an enlightening experience which has taught me
-much about my personal software engineering approach and the type systems of
-other languages.
+only experienced the ML functional programming from Part Ia, diving into
+Haskell's intricate type system has been an enlightening experience which has
+taught me much about my personal software engineering approach and the type
+systems of other languages.
 
 \section{Accomplishments}
 
@@ -2138,19 +2210,18 @@ used in OOP). Furthermore, my software engineering approaches have been improved
 by often needing to re-factor code and design complex systems such as the
 centring algorithm.
 
-I consider the project a success in that it both completed the requirements (see
-\autoref{chap:evaluation}), providing a step forward for the Ypnos programming
-language, and helped me learn much about Haskell and GPU computation.
+I consider the project a success in that it both accomplished the requirements
+(see \autoref{chap:evaluation}), providing a step forward for the Ypnos
+programming language, and helped me learn much about Haskell and GPU
+computation.
 
 \section{Lessons Learnt}
 
 In completing this project I have learnt the importance of having a strong plan
 to stick to. I realised as I went further into this project that I had not
-allocated enough time to researching and learning a new programming ecosystem. I
-had assumed that picking up a new language would be as easy as the previous OOP
-languages I have taught myself (such as Python). However, I had severely
-underestimated the time it would take to get familiar with the complex type
-theory underlying the Haskell compiler.
+allocated enough time to researching and learning a new programming
+ecosystem. Particularly, I had severely underestimated the time it would take to
+get familiar with the complex type theory underlying the Haskell compiler.
 
 Furthermore, if I were to repeat the project I would set out better procedures
 for making notes and documenting the project as it progressed. The time required
@@ -2158,7 +2229,7 @@ to compile all the information for the dissertation and understand the different
 approaches taken in the implementation was significantly more than I had
 previously anticipated. In future work I will endeavour to keep a more complete
 diary with frequent reviews of all the work accomplished so far and how it all
-fits together.\todo{Compare with requirements to wrap up?}
+fits together.
 
 \section{Future Work}
 

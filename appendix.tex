@@ -181,6 +181,47 @@ The comonadicity is lost.
 \caption{Comparison of the different API using cognitive dimensions. \label{tbl:cogcomp}}
 \end{longtable}
 
+\chapter{Game of Life Stencil}
+\label{chap:life}
+
+\begin{hlisting}
+count :: [Exp Bool] -> Exp Int
+count = sum . (map (\ x -> x ? (1, 0)))
+
+life = [funGPU| X*Y:| a  b  c |
+                    | d @e  f |
+                    | g  h  i | ->
+                      let n = count ([a, b, c, d, f, g, h, i] :: [Exp Bool]) in
+                        (n ==* 3) ||* ((1 <* n) &&* (n <* 4) &&* e) |]
+
+runLife :: [Bool] -> (Int,Int) -> [Bool]
+runLife xs (x, y) = gridData $ runG (GPUArr life) xs'
+    where xs' = listGrid (Dim X :* Dim Y) (0, 0) (x, y) (cycle xs) mirrorB
+
+lifer f (LGrid w h l) = LGrid w h (f l (h, w))
+
+data LifeGrid = LGrid Int Int [Bool]
+
+instance Show LifeGrid where
+  show (LGrid width _ elems) = foldl j "" $ map f $ split width elems
+      where j a b = a ++ "\n" ++ b
+            f = map g
+            g False = '.'
+            g _     = '#'
+
+split :: Int -> [a] -> [[a]]
+split n = takeWhile (not . null) . unfoldr (Just . splitAt n)
+
+grid :: [String] -> LifeGrid
+grid l = LGrid w h (concatMap f l)
+        where f = map g
+              w = length (l!!0)
+              h = length l
+              g '.' = False
+              g _   = True
+
+\end{hlisting}
+
 \chapter{Original Proposal}
 \label{chap:prop}
 

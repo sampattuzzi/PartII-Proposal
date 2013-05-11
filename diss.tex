@@ -1,3 +1,10 @@
+%TC:group hflisting 0 0
+%TC:group hlisting 0 0
+%TC:group tikzpicture 0 0
+%TC:group tabular 1 1
+%TC:group table 0 1
+
+%TC:ignore
 \documentclass[
     12pt,
     a4paper,
@@ -18,9 +25,7 @@
 \usepackage{titling}
 \usepackage{pifont}
 \usepackage{needspace}
-\usepackage
-[disable]
-{todonotes}
+\usepackage [disable] {todonotes}
 
 \usepackage{tikz}
 \usetikzlibrary{backgrounds,shapes,arrows,fit,trees}
@@ -82,11 +87,6 @@
 {\begin{snugshade}\begin{quote}\openquote}
 {\hfill\closequote\end{quote}\end{snugshade}}
 
-%TC:group hflisting 0 0
-%TC:group hlisting 0 0
-%TC:group tabular 1 1
-%TC:group table 0 1
-
 \lstnewenvironment{hflisting}[1][]
   {\lstset{language=Haskell,float=tb,captionpos=b,breaklines=true,#1}}% \begin{javalisting}[...]
   {} % \end{javalisting}
@@ -118,6 +118,7 @@
 \title{GPU Accelerating the Ypnos Programming Language}
 \author{Samuel Pattuzzi\\ Robinson College}
 \date{\today}
+%TC:endignore
 
 \begin{document}
 \frontmatter

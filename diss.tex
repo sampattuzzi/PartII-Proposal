@@ -10,12 +10,13 @@
     a4paper,
     twoside,
     openright,
-%    BCOR=1cm,
+    BCOR=6mm,
     ]{scrbook}
 
 \usepackage[svgnames]{xcolor}
 \usepackage{calc}
 \usepackage{listings}
+\usepackage{tabularx}
 \usepackage{amssymb,amsmath}
 \usepackage[unicode=true]{hyperref}
 \usepackage{longtable}
@@ -483,12 +484,11 @@ in the language and implementation.
 \tikzstyle{bin} = [block, fill=gray!30]
 \tikzstyle{surround} = [block, fill=gray!20]
 \tikzstyle{line} = [draw, -latex']
-
+\resizebox {\textwidth} {!} {
 \begin{tikzpicture}[row sep=0.5em]
   % Place nodes
   \def\x{7em}
-  \node (9) {};
-  \matrix[right=of 9] (1)
+  \matrix[anchor=base west] (1)
   {
     \node (title1) {Phase 1};\\
     \node [ypnos] (ypnos1) {Ypnos syntax}; \\
@@ -498,8 +498,8 @@ in the language and implementation.
   \matrix[right=\x of 1] (2)
   {
     \node (title2) {Phase 2}; \\
-    \node [haskell] (haskell2) {Haskell code}; & \\
-    \node [ypnos] (libs2) {Ypnos primitives}; & \\
+    \node [haskell] (haskell2) {Haskell code}; \\
+    \node [ypnos] (libs2) {Ypnos primitives}; \\
   };
   \matrix[right=\x of 2] (3)
   {
@@ -522,6 +522,7 @@ in the language and implementation.
   \path [line] (background2) --
   node  [midway, below] {Compile} (background3);
 \end{tikzpicture}
+}
 \caption{The compilation stages of an Ypnos program.\label{fig:comp-stages}}
 \end{figure}
 
@@ -869,8 +870,8 @@ this project. \autoref{tbl:iter} describes the phases of development: each
 phase consisted of a working code prototype and a small usability evaluation. In
 the following sections I will describe each approach taken in more detail.
 
-\begin{table}
-\begin{tabular}{l l | p{11cm}}
+\begin{table}[h]
+\begin{tabularx}{\textwidth}{ll|X}
   \hline
   Phase 1 & Motivation & Create a working translation and run primitive using Accelerate.\\
   & Produced & The non-unifying approach to primitives and compile time approach to stencil translation with centring (\autoref{sec:non-unify-appr} and \autoref{sec:typesysapp}).
@@ -884,7 +885,7 @@ the following sections I will describe each approach taken in more detail.
   Phase 4 & Motivation & Remove the need for the programmer to change many constructors when switching.\\
   & Produced & The final approach using a combination of type synonym families and type class parameters (\autoref{sec:final}).\\
   \hline
-\end{tabular}
+\end{tabularx}
 \caption{The phase of iterative development in this project: for each cycle the motivation and work produced is described. \label{tbl:iter}}
 \end{table}
 
@@ -1592,9 +1593,9 @@ syntax extensions and a library of primitives. On top of the previous
 implementation, this project implemented: changes to the syntax extensions to
 allow the generation of GPU stencils (by implementing the \texttt{funGPU}
 quasiquoter), library generalisation and API refinement, a re-factoring of CPU
-primitives to fit the new API, and a set of new GPU primitives. See
-\autoref{fig:files} for a complete summary of the changes introduced by this
-project.
+primitives to fit the new API, and a set of new GPU primitives.
+\autoref{fig:files} highlights the modules implemented on top of the original
+Ypnos implementation.
 
 This chapter outlined: stencil compilation and the primitive implementation
 (reduce and run). Stencil compilation was attempted in a compile-time and
@@ -1645,7 +1646,7 @@ destructors.
       }
       child [missing] {}
       child [missing] {}
-      child { node [created] {Examples -- used for testing.}
+      child { node [created] {Examples -- used for testing}
         child { node [created] {Reductions.hs}}
         child { node [created] {Stencils.hs}}
       }
@@ -1687,10 +1688,9 @@ destructors.
   };
 
 \end{tikzpicture}
-\caption{The file tree of the final Ypnos project showing all work done. White
-  files are unchanged from the original implementation. Green files are
-  completely new and created by me. Yellow files were modified from the
-  original.}
+\caption{The file tree of the final Ypnos project highlighting modules
+  added. White files were unchanged from the original implementation, yellow
+  files were modified and green files were created from scratch. .}
 \label{fig:files}
 \end{figure}
 
